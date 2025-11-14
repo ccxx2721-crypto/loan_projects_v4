@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <title>貸款智慧分析系統 v8</title>
+  <title>貸款智慧分析系統 v9</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     :root {
@@ -195,7 +195,8 @@
 
     input[type="number"],
     input[type="text"],
-    select {
+    select,
+    textarea {
       width: 100%;
       padding: 7px 9px;
       border-radius: 10px;
@@ -204,11 +205,13 @@
       font-size: 13px;
       outline: none;
       transition: 0.15s border, 0.15s box-shadow, 0.15s background;
+      resize: vertical;
     }
 
     input[type="number"]:focus,
     input[type="text"]:focus,
-    select:focus {
+    select:focus,
+    textarea:focus {
       border-color: var(--primary);
       box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.35);
       background: #fff;
@@ -230,7 +233,8 @@
       cursor: pointer;
     }
 
-    .inline-checks input[type="checkbox"] {
+    .inline-checks input[type="checkbox"],
+    .inline-checks input[type="radio"] {
       width: 13px;
       height: 13px;
     }
@@ -282,6 +286,10 @@
       background: #fef9c3;
       color: #92400e;
       border: 1px solid #facc15;
+    }
+
+    .btn-sub:hover {
+      background: #fef3c7;
     }
 
     .hint {
@@ -506,11 +514,59 @@
       color: #b91c1c;
     }
 
+    .case-item-btn {
+      width: 100%;
+      justify-content: space-between;
+      margin-top: 6px;
+      font-size: 12px;
+      padding: 6px 10px;
+    }
+
+    .case-item-meta {
+      font-size: 11px;
+      color: #9ca3af;
+    }
+
     footer {
       margin-top: 18px;
       font-size: 11px;
       color: #9ca3af;
       text-align: center;
+    }
+
+    details summary {
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 6px 0;
+    }
+
+    details summary::-webkit-details-marker {
+      display: none;
+    }
+
+    details summary::before {
+      content: "▶";
+      display: inline-block;
+      font-size: 10px;
+      margin-right: 6px;
+      transform: translateY(-1px);
+      color: #6b7280;
+    }
+
+    details[open] summary::before {
+      content: "▼";
+    }
+
+    ul.memo-list {
+      margin: 4px 0 0 18px;
+      padding: 0;
+      font-size: 12px;
+      color: #4b5563;
+    }
+
+    ul.memo-list li {
+      margin-bottom: 3px;
     }
   </style>
 </head>
@@ -523,13 +579,13 @@
         <div>
           貸款智慧分析系統
           <div class="subtitle">
-            一次輸入客戶條件 ➜ 自動配對房貸 / 信貸 / 手機 / 車貸 / 三胎專案，並提供多種月付試算
+            一次輸入客戶條件 ➜ AI 自動配對房貸 / 信貸 / 手機 / 車貸 / 三胎專案，並提供各種月付 / 到手金額試算
           </div>
         </div>
       </div>
     </div>
     <div class="tag-version">
-      <span>v8</span> 新增「幾分 / 純利息 / 信用分數」試算
+      <span>v9</span> 新增摘要話術 / 到手金額 / 暫存案件 / 組合策略
     </div>
   </header>
 
@@ -542,11 +598,16 @@
           客戶條件（AI 智能推薦）
         </div>
         <div class="chip">
-          <span class="chip-dot"></span> 建議資料越完整，推薦越精準
+          <span class="chip-dot"></span> 資料越完整，推薦越精準
         </div>
       </div>
 
       <div class="form-grid">
+        <div class="form-row-full">
+          <label>客戶稱呼（選填）</label>
+          <input type="text" id="custName" placeholder="例如 王先生 / 陳小姐" />
+        </div>
+
         <div>
           <label>年齡</label>
           <input type="number" id="age" min="18" max="80" placeholder="例如 35" value="30" />
@@ -628,7 +689,7 @@
           <span class="card-title-badge">2</span>
           快速試算（多工具）
         </div>
-        <span class="chip">不會算利率沒關係，下面有「幾分 / 純利息」模式</span>
+        <span class="chip">幾分 / 年利率 / 到手金額 / 純利息，一次算好</span>
       </div>
 
       <!-- 等額本息 -->
@@ -735,7 +796,7 @@
             <input type="number" id="ioAmount" value="200000" />
           </div>
           <div>
-            <label>可輸入「幾分」或月利率（%）</label>
+            <label>月利率（幾分 / %）</label>
             <input type="number" id="ioRate" value="2" step="0.1" />
           </div>
           <div>
@@ -748,6 +809,38 @@
         </div>
         <div class="calc-result" id="ioResult">
           每月只繳利息，期末仍需一次處理全部本金。
+        </div>
+      </div>
+
+      <!-- 到手金額試算 -->
+      <div class="sub-card">
+        <h4>
+          到手金額試算
+          <span class="sub-tag">核准金額扣掉代償 / 各種費用</span>
+        </h4>
+        <div class="calc-grid">
+          <div>
+            <label>核准金額（元）</label>
+            <input type="number" id="netApprove" placeholder="例如 300000" />
+          </div>
+          <div>
+            <label>代償金額（元）</label>
+            <input type="number" id="netPayoff" placeholder="例如 120000" />
+          </div>
+          <div>
+            <label>服務費 / 代書費（元）</label>
+            <input type="number" id="netService" placeholder="例如 15000" />
+          </div>
+          <div>
+            <label>其他雜費（元）</label>
+            <input type="number" id="netOther" placeholder="例如 5000" />
+          </div>
+        </div>
+        <div class="btn-row" style="margin-top:8px;">
+          <button class="btn-sub" id="btnNetCalc">計算實際到手</button>
+        </div>
+        <div class="calc-result" id="netResult">
+          幫客戶算「實際入袋」多少，方便跟他說明。
         </div>
       </div>
 
@@ -791,6 +884,46 @@
         </div>
       </div>
 
+      <!-- 文字摘要 / 話術 -->
+      <div class="sub-card">
+        <h4>
+          文字摘要 / 話術
+          <span class="sub-tag">一鍵產生，可直接貼給客戶</span>
+        </h4>
+        <div class="btn-row" style="margin-bottom:6px;">
+          <button class="btn-sub" id="btnSummary">產生摘要</button>
+          <button class="btn-outline" id="btnCopySummary">複製文字</button>
+        </div>
+        <textarea id="summaryText" rows="4" placeholder="按下「產生摘要」後，這裡會自動產生文字內容，適合貼到 Line 或備註。"></textarea>
+        <div class="hint">
+          文字會依照年齡 / 收入 / 資產 / 負債比 / 信用狀況，自動產生一段說明與建議方向。
+        </div>
+      </div>
+
+      <!-- 案件暫存清單 -->
+      <div class="sub-card">
+        <h4>
+          案件暫存清單
+          <span class="sub-tag">只存這台裝置，不會上傳</span>
+        </h4>
+        <div class="calc-grid">
+          <div>
+            <label>客戶代號 / 名稱</label>
+            <input type="text" id="caseLabel" placeholder="例如 王先生-房二胎" />
+          </div>
+          <div style="display:flex;align-items:flex-end;gap:8px;">
+            <button class="btn-sub" id="btnSaveCase">加入暫存</button>
+            <button class="btn-outline" id="btnClearCases">清空暫存</button>
+          </div>
+        </div>
+        <div class="hint">
+          點選下方案件即可載入當時的條件（不含試算結果）。資料只存在瀏覽器 localStorage。
+        </div>
+        <div id="caseList" class="empty">
+          目前沒有暫存案件。
+        </div>
+      </div>
+
       <footer>
         ※ 本系統僅協助你快速整理專案與試算金額，實際核準條件以各銀行 / 金融公司為準。
       </footer>
@@ -812,6 +945,12 @@
       <div class="hint">
         先輸入左側條件並按「產生 AI 推薦」，系統會依年齡 / 資產 / 信用狀況 / 需求分類，替你排出適合度。
       </div>
+
+      <!-- 組合策略建議 -->
+      <div class="sub-card" id="strategyBox">
+        尚未產生組合策略建議，請先產生 AI 推薦。
+      </div>
+
       <div class="project-list" id="projectList">
         <div class="empty">
           尚未產生結果，請先輸入條件並按下「🔍 產生 AI 推薦」。
@@ -819,12 +958,71 @@
       </div>
     </section>
   </div>
+
+  <!-- 公司手冊速查 -->
+  <section class="card" style="margin-top:18px;">
+    <div class="card-header">
+      <div class="card-title">
+        <span class="card-title-badge">4</span>
+        公司手冊速查（備忘錄）
+      </div>
+      <span class="chip">以下內容可依你實務經驗自行修改</span>
+    </div>
+    <div class="hint">
+      這裡只是一個你自己的重點摘要區，不是官方規則。建議依照你手上的 PDF / 公告慢慢補上。
+    </div>
+
+    <details>
+      <summary>和潤（房貸 / 車貸）</summary>
+      <ul class="memo-list">
+        <li>房貸二胎：常見最高總成數約 8 成上下，實務看物件與地段。</li>
+        <li>對薪轉穩定、年資較長客戶較友善，信用瑕疵需個案評估。</li>
+        <li>車貸部分：車齡 / 車種影響成數與利率，需搭配行照與估價。</li>
+      </ul>
+    </details>
+
+    <details>
+      <summary>鼎信（厝邊貸 / 特殊物件）</summary>
+      <ul class="memo-list">
+        <li>可做一般銀行較不喜歡的物件，例如：農地、原民地、漁塭、出租套房等。</li>
+        <li>適合信用體質較弱、但物件條件有價值的客戶。</li>
+        <li>利率與費用相對偏高，說明時需強調風險與還款能力。</li>
+      </ul>
+    </details>
+
+    <details>
+      <summary>亞太（手機 / 機車專案）</summary>
+      <ul class="memo-list">
+        <li>手機專案：需符合指定機型與電信方案，適合小額周轉。</li>
+        <li>機車專案：看車齡、持有時間與是否有舊貸可代償。</li>
+        <li>常搭配職業工會 / 勞保資料，利率與額度依實際公告為準。</li>
+      </ul>
+    </details>
+
+    <details>
+      <summary>TAC / 融易（汽機車原融）</summary>
+      <ul class="memo-list">
+        <li>車子 / 機車已繳一段時間，可再融資一輪拿出現金。</li>
+        <li>會看持有時間、里程數與車況，及客戶信用狀況。</li>
+        <li>可搭配整合高利貸款，降低整體月付壓力。</li>
+      </ul>
+    </details>
+
+    <details>
+      <summary>你自己的備忘錄（可自由增修）</summary>
+      <ul class="memo-list">
+        <li>在這裡記錄：哪間公司最近收件比較積極、哪幾種條件最好先送哪裡。</li>
+        <li>也可以寫：某公司針對哪種瑕疵（遲繳、停卡）態度如何。</li>
+        <li>此區純備忘，不會影響上面的試算與 AI 推薦邏輯。</li>
+      </ul>
+    </details>
+  </section>
 </div>
 
 <script>
   // ------------------------
   // 專案資料（示範版）
-  // ⚠️ 你可以把下面 projects 陣列換成你 v7 裡「完整專案設定」
+  // ⚠️ 你可以把下面 projects 陣列換成你 v4 / v7 裡「完整專案設定」
   //    結構維持一樣即可，AI 推薦會自動套用。
   // ------------------------
   const projects = [
@@ -921,7 +1119,7 @@
   ];
 
   // -----------------------
-  // 取得表單資料
+  // 取得客戶條件（給 AI 推薦用）
   // -----------------------
   function getCustomer() {
     const age = Number(document.getElementById("age").value) || 0;
@@ -956,53 +1154,43 @@
       debtRatio,
       asset,
       creditLevel,
+      creditNormal,
+      creditDelay,
+      creditBad,
       companyFilters,
       wantTypes
     };
   }
 
   // -----------------------
-  // 專案評分邏輯（可依你公司習慣再調整）
+  // 專案評分邏輯
   // -----------------------
   function scoreProject(c, p) {
-    // 公司篩選
     if (c.companyFilters.length && !c.companyFilters.includes(p.company)) return 0;
-
-    // 類型篩選
     if (c.wantTypes.length && !c.wantTypes.includes(p.category)) return 0;
-
-    // 年齡不符
     if (c.age && (c.age < p.minAge || c.age > p.maxAge)) return 0;
-
-    // 收入不足
     if (p.minIncome && c.income && c.income < p.minIncome) return 0;
 
-    // 資產不符（例如需要房 / 車）
     if (p.needAsset === "house" && c.asset !== "house") return 0;
     if (p.needAsset === "car" && c.asset !== "car") return 0;
     if (p.needAsset === "bike" && c.asset !== "bike") return 0;
 
     let score = 50;
 
-    // 信用等級匹配
     if (c.creditLevel === "normal" && p.creditLevel === "normal") score += 15;
     if (c.creditLevel === "light" && p.creditLevel !== "heavy") score += 5;
     if (c.creditLevel === "heavy" && p.creditLevel === "heavy") score += 5;
     if (c.creditLevel === "heavy" && p.creditLevel === "normal") score -= 25;
 
-    // 負債比
     if (c.debtRatio > 70) score -= 25;
     else if (c.debtRatio > 50) score -= 10;
     else if (c.debtRatio < 30 && c.debtRatio > 0) score += 5;
 
-    // 需求金額 vs 額度（只是大概估）
     if (p.category === "信貸" && c.loanAmount > c.income * 22) score -= 10;
 
-    // 額外微調：房貸、車貸對有房有車加分
     if (p.category === "房貸" && c.asset === "house") score += 5;
     if (p.category === "汽車" && c.asset === "car") score += 5;
 
-    // 信用太差又是銀行類型，扣分
     if (c.creditLevel === "heavy" && ["新鑫", "和潤", "E-Good"].includes(p.company)) {
       score -= 15;
     }
@@ -1011,7 +1199,7 @@
   }
 
   // -----------------------
-  // 渲染專案
+  // 渲染專案列表
   // -----------------------
   function renderProjects(list, mode = "best") {
     const container = document.getElementById("projectList");
@@ -1063,36 +1251,72 @@
   }
 
   // -----------------------
-  // 事件：AI 推薦
+  // 組合策略建議
   // -----------------------
-  document.getElementById("btnRecommend").addEventListener("click", () => {
-    const c = getCustomer();
-    const scored = projects
-      .map((p) => ({ ...p, _score: scoreProject(c, p) }))
-      .filter((p) => p._score > 0)
-      .sort((a, b) => b._score - a._score);
+  function renderStrategies(c, list) {
+    const box = document.getElementById("strategyBox");
+    if (!box) return;
 
-    // 預設：只看前 10 名
-    renderProjects(scored.slice(0, 10), "best");
-    setActiveTab("best");
-  });
+    if (!list || !list.length) {
+      box.innerHTML = "尚未產生組合策略建議，請先產生 AI 推薦。";
+      return;
+    }
 
-  // 清空條件
-  document.getElementById("btnClear").addEventListener("click", () => {
-    document.getElementById("age").value = "";
-    document.getElementById("income").value = "";
-    document.getElementById("loanAmount").value = "";
-    document.getElementById("debtMonthly").value = "";
-    document.querySelector("input[name='asset'][value='none']").checked = true;
-    document.getElementById("creditNormal").checked = true;
-    document.getElementById("creditDelay").checked = false;
-    document.getElementById("creditBad").checked = false;
-    document.querySelectorAll(".companyFilter").forEach((c) => (c.checked = false));
-    document.querySelectorAll(".wantType").forEach((c) => (c.checked = true));
+    const lines = [];
+    const house = list.find((p) => p.category === "房貸");
+    const cash = list.find((p) => p.category === "信貸");
+    const car = list.find((p) => p.category === "汽車");
+    const moto = list.find((p) => p.category === "機車");
 
-    document.getElementById("projectList").innerHTML =
-      '<div class="empty">尚未產生結果，請先輸入條件並按下「🔍 產生 AI 推薦」。</div>';
-  });
+    const ratio = c.debtRatio || 0;
+    const ratioText = ratio ? `目前負債比約 ${ratio.toFixed(1)}%` : "目前負債比未填";
+
+    if (c.asset === "house" && house) {
+      let sA = `方案 A：以【${house.company}】「${house.name}」作為主力資金來源，`;
+      if (ratio > 50) {
+        sA += "優先整合高利貸款，降低每月月付壓力。";
+      } else {
+        sA += "可做一部份二胎或增貸，提供周轉與整合彈性。";
+      }
+      lines.push(sA);
+
+      if (cash) {
+        lines.push(
+          `方案 B：房貸用來處理較大額整合，剩餘小額周轉可搭配【${cash.company}】「${cash.name}」，避免全數壓在房屋上。`
+        );
+      }
+    }
+
+    if (c.asset === "car" && car && cash) {
+      lines.push(
+        `方案 C：先以【${car.company}】「${car.name}」做車貸 / 原融取得主要資金，再以【${cash.company}】「${cash.name}」補足不足部分，分散還款風險。`
+      );
+    }
+
+    if (c.asset === "bike" && moto) {
+      lines.push(
+        `方案 D：若名下僅有機車，可優先以「${moto.name}」取得小額周轉，之後視信用恢復情況，再轉往銀行信貸或房貸。`
+      );
+    }
+
+    if (!lines.length) {
+      const top1 = list[0];
+      const top2 = list[1];
+      let base = `目前依條件最適合的是【${top1.company}】「${top1.name}」，`;
+      if (top2) {
+        base += `備選方案可考慮【${top2.company}】「${top2.name}」，`;
+      }
+      base += "實際承作時可依利率 / 成數 / 手續費再做比較。";
+      lines.push(base);
+    }
+
+    lines.push(`補充說明：${ratioText}，建議整體月付控制在月收入的 50% 以內較為安全。`);
+
+    box.innerHTML =
+      "<ul class='memo-list'>" +
+      lines.map((t) => `<li>${t}</li>`).join("") +
+      "</ul>";
+  }
 
   // -----------------------
   // Tab 切換
@@ -1111,22 +1335,60 @@
       if (tab === "all") {
         const all = projects.map((p) => ({ ...p, _score: 50 }));
         renderProjects(all, "all");
-      } else if (tab === "alt") {
-        const c = getCustomer();
-        const scored = projects
-          .map((p) => ({ ...p, _score: scoreProject(c, p) }))
-          .filter((p) => p._score >= 40)
-          .sort((a, b) => b._score - a._score);
-        renderProjects(scored.slice(0, 15), "alt");
+        const box = document.getElementById("strategyBox");
+        if (box) {
+          box.innerHTML = "目前為全部專案列表模式，請先產生 AI 推薦以查看組合策略建議。";
+        }
       } else {
         const c = getCustomer();
         const scored = projects
           .map((p) => ({ ...p, _score: scoreProject(c, p) }))
           .filter((p) => p._score > 0)
           .sort((a, b) => b._score - a._score);
-        renderProjects(scored.slice(0, 10), "best");
+
+        if (tab === "alt") {
+          renderProjects(scored.filter((p) => p._score >= 40).slice(0, 15), "alt");
+        } else {
+          renderProjects(scored.slice(0, 10), "best");
+        }
+        renderStrategies(c, scored);
       }
     });
+  });
+
+  // -----------------------
+  // AI 推薦 / 清空
+  // -----------------------
+  document.getElementById("btnRecommend").addEventListener("click", () => {
+    const c = getCustomer();
+    const scored = projects
+      .map((p) => ({ ...p, _score: scoreProject(c, p) }))
+      .filter((p) => p._score > 0)
+      .sort((a, b) => b._score - a._score);
+
+    renderProjects(scored.slice(0, 10), "best");
+    setActiveTab("best");
+    renderStrategies(c, scored);
+  });
+
+  document.getElementById("btnClear").addEventListener("click", () => {
+    document.getElementById("custName").value = "";
+    document.getElementById("age").value = "";
+    document.getElementById("income").value = "";
+    document.getElementById("loanAmount").value = "";
+    document.getElementById("debtMonthly").value = "";
+    document.querySelector("input[name='asset'][value='none']").checked = true;
+    document.getElementById("creditNormal").checked = true;
+    document.getElementById("creditDelay").checked = false;
+    document.getElementById("creditBad").checked = false;
+    document.querySelectorAll(".companyFilter").forEach((c) => (c.checked = false));
+    document.querySelectorAll(".wantType").forEach((c) => (c.checked = true));
+    document.getElementById("summaryText").value = "";
+
+    document.getElementById("projectList").innerHTML =
+      '<div class="empty">尚未產生結果，請先輸入條件並按下「🔍 產生 AI 推薦」。</div>';
+    document.getElementById("strategyBox").innerHTML =
+      "尚未產生組合策略建議，請先產生 AI 推薦。";
   });
 
   // -----------------------
@@ -1194,12 +1456,21 @@
     const totalPay = monthly * months;
     const totalInterest = totalPay - amount;
 
+    const annualRate = fen * 12;
+    let warn = "";
+    if (annualRate > 16) {
+      warn =
+        "<br/>⚠ 依民法約定利率上限 16% 年利率，本試算已超過此區間，實務上常以違約金或其他名目呈現，請特別留意合約。";
+    }
+
     document.getElementById("fenResult").innerHTML =
       `每月本金約 <strong>${principalPart.toFixed(0).toLocaleString()} 元</strong>，` +
       `利息（${fen} 分）約 <strong>${interestPart.toFixed(0).toLocaleString()} 元</strong>，` +
       `每月應繳 <strong>${monthly.toFixed(0).toLocaleString()} 元</strong>。<br/>` +
       `總繳金額約 ${totalPay.toFixed(0).toLocaleString()} 元，其中利息約 ` +
-      `<strong>${totalInterest.toFixed(0).toLocaleString()} 元</strong>。`;
+      `<strong>${totalInterest.toFixed(0).toLocaleString()} 元</strong>。` +
+      `<br/>換算年利率約 <strong>${annualRate.toFixed(1)}%</strong>。` +
+      warn;
   });
 
   // -----------------------
@@ -1218,15 +1489,40 @@
     const monthRate = rateFen / 100; // 幾分 → 月利率
     const monthlyInterest = amount * monthRate;
     const totalInterest = monthlyInterest * months;
+    const annualRate = monthRate * 12 * 100;
 
     document.getElementById("ioResult").innerHTML =
       `每月只需繳利息約 <strong>${monthlyInterest.toFixed(0).toLocaleString()} 元</strong>，` +
       `繳滿 ${months} 期，總利息約 <strong>${totalInterest.toFixed(0).toLocaleString()} 元</strong>。` +
-      `<br/>※ 本金 ${amount.toLocaleString()} 元不會降低，期滿仍需一次處理。`;
+      `<br/>換算年利率約 <strong>${annualRate.toFixed(1)}%</strong>，本金 ${amount.toLocaleString()} 元不會降低，期滿仍需一次處理。`;
   });
 
   // -----------------------
-  // 信用分數預估（簡易）
+  // 到手金額試算
+  // -----------------------
+  document.getElementById("btnNetCalc").addEventListener("click", () => {
+    const approve = Number(document.getElementById("netApprove").value) || 0;
+    const payoff = Number(document.getElementById("netPayoff").value) || 0;
+    const service = Number(document.getElementById("netService").value) || 0;
+    const other = Number(document.getElementById("netOther").value) || 0;
+
+    if (!approve) {
+      document.getElementById("netResult").innerText = "請至少填入核准金額。";
+      return;
+    }
+
+    const net = approve - payoff - service - other;
+
+    document.getElementById("netResult").innerHTML =
+      `核准金額：${approve.toLocaleString()} 元<br/>` +
+      `扣除代償：${payoff.toLocaleString()} 元<br/>` +
+      `扣除服務費 / 代書費：${service.toLocaleString()} 元<br/>` +
+      `扣除其他雜費：${other.toLocaleString()} 元<br/>` +
+      `➡ 客戶實際到手約 <strong>${net.toFixed(0).toLocaleString()} 元</strong>。`;
+  });
+
+  // -----------------------
+  // 信用分數預估
   // -----------------------
   document.getElementById("btnScore").addEventListener("click", () => {
     const year = Number(document.getElementById("scYear").value) || 0;
@@ -1272,6 +1568,225 @@
       `預估信用分數：約 <strong style="color:${color}">${score} 分</strong>（${level}）。<br/>` +
       `※ 僅供你評估客戶體質參考，實際仍以各銀行授信準則為主。`;
   });
+
+  // -----------------------
+  // 文字摘要 / 話術
+  // -----------------------
+  function buildSummaryText() {
+    const c = getCustomer();
+    const nameRaw = (document.getElementById("custName").value || "").trim();
+    const name = nameRaw || "您";
+
+    const incomeWan = c.income ? (c.income / 10000).toFixed(1) : null;
+    const debtRatio = c.debtRatio || 0;
+    const ratioText = c.debtMonthly
+      ? `目前每月固定還款約 ${c.debtMonthly.toLocaleString()} 元，負債比約 ${debtRatio.toFixed(1)}%。`
+      : "目前未填寫既有負債，實際負債比需再確認。";
+
+    let assetText = "目前名下無房無車，以信貸、小額、手機／機車等方案為主。";
+    if (c.asset === "house") {
+      assetText = "名下已有房屋，可優先評估房屋增貸或二胎整合高利貸款。";
+    } else if (c.asset === "car") {
+      assetText = "名下有汽車，可搭配車貸 / 原融做一部分資金運用。";
+    } else if (c.asset === "bike") {
+      assetText = "名下有機車，可評估機車貸款或原融作為小額周轉管道。";
+    }
+
+    let creditText = "整體信用正常，沒有明顯瑕疵。";
+    if (c.creditLevel === "light") {
+      creditText = "過去有一些輕微遲繳或小瑕疵，仍有機會評估銀行或融資專案。";
+    } else if (c.creditLevel === "heavy") {
+      creditText = "目前信用狀況偏重度瑕疵，銀行件難度較高，較適合民間／二胎／代書路線。";
+    }
+
+    let dirText = "";
+    if (c.asset === "house") {
+      dirText += "以房屋增貸或二胎作為主力資金來源，搭配整合高利負債，是目前較優先的方向。";
+    } else if (c.asset === "car") {
+      dirText += "可先以車貸或車輛原融取得主力資金，必要時再搭配少量信貸補足。";
+    } else if (c.asset === "bike") {
+      dirText += "以機車貸款或小額信貸為主，未來信用體質改善後再評估房貸或較大型資金方案。";
+    } else {
+      dirText += "目前以信貸、小額分期或手機／機車專案為主，等信用與收入條件更穩定後再進階到房貸 / 大額資金規劃。";
+    }
+
+    let safeLine = "";
+    if (c.income > 0) {
+      const safeMonth = c.income * 0.5 - c.debtMonthly;
+      if (safeMonth > 0) {
+        safeLine =
+          `以月收入約 ${c.income.toLocaleString()} 元來看，建議全部貸款月付控制在收入的 50% 以內，` +
+          `新案件月付盡量不要超過約 ${safeMonth.toFixed(0).toLocaleString()} 元，比較安全。`;
+      } else {
+        safeLine =
+          "目前負債比已接近或超過收入的 50%，建議以整合高利負債、降低月付為優先，而不是再增加新的月付壓力。";
+      }
+    } else {
+      safeLine = "若要更精準規劃月付與額度，建議先確認實際月收入與現有貸款月付。";
+    }
+
+    const ageText = c.age ? `${c.age} 歲` : "年齡未填";
+    const incomeText = incomeWan ? `月收約 ${incomeWan} 萬元` : "月收入未填";
+
+    const summary =
+      `${name}目前約 ${ageText}，${incomeText}，${assetText}\n` +
+      `${ratioText}\n` +
+      `信用狀況而言，${creditText}\n\n` +
+      `以目前條件來看，建議的操作方向如下：\n` +
+      `1️⃣ 資金規劃方向：${dirText}\n` +
+      `2️⃣ 月付安全建議：${safeLine}\n\n` +
+      `以上是初步試算與建議，實際核准額度與利率仍需依各銀行 / 金融公司審核為準。`;
+
+    return summary;
+  }
+
+  document.getElementById("btnSummary").addEventListener("click", () => {
+    document.getElementById("summaryText").value = buildSummaryText();
+  });
+
+  document.getElementById("btnCopySummary").addEventListener("click", () => {
+    const text = document.getElementById("summaryText").value;
+    if (!text.trim()) {
+      alert("請先產生摘要，再進行複製。");
+      return;
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(
+        () => alert("已複製到剪貼簿，可以貼到 Line 或備註。"),
+        () => alert("複製失敗，請手動選取文字複製。")
+      );
+    } else {
+      alert("瀏覽器不支援自動複製，請手動選取文字。");
+    }
+  });
+
+  // -----------------------
+  // 案件暫存（localStorage）
+  // -----------------------
+  const CASE_KEY = "loan_cases_v1";
+
+  function getFormSnapshot() {
+    const c = getCustomer();
+    return {
+      custName: document.getElementById("custName").value || "",
+      age: document.getElementById("age").value || "",
+      income: document.getElementById("income").value || "",
+      loanAmount: document.getElementById("loanAmount").value || "",
+      debtMonthly: document.getElementById("debtMonthly").value || "",
+      asset: c.asset,
+      creditNormal: c.creditNormal,
+      creditDelay: c.creditDelay,
+      creditBad: c.creditBad,
+      companyFilters: c.companyFilters,
+      wantTypes: c.wantTypes
+    };
+  }
+
+  function setFormSnapshot(snap) {
+    document.getElementById("custName").value = snap.custName || "";
+    document.getElementById("age").value = snap.age || "";
+    document.getElementById("income").value = snap.income || "";
+    document.getElementById("loanAmount").value = snap.loanAmount || "";
+    document.getElementById("debtMonthly").value = snap.debtMonthly || "";
+
+    if (snap.asset) {
+      const radio = document.querySelector(`input[name='asset'][value='${snap.asset}']`);
+      if (radio) radio.checked = true;
+    }
+
+    document.getElementById("creditNormal").checked = !!snap.creditNormal;
+    document.getElementById("creditDelay").checked = !!snap.creditDelay;
+    document.getElementById("creditBad").checked = !!snap.creditBad;
+
+    document.querySelectorAll(".companyFilter").forEach((c) => {
+      c.checked = snap.companyFilters?.includes(c.value) || false;
+    });
+    document.querySelectorAll(".wantType").forEach((c) => {
+      c.checked = snap.wantTypes?.includes(c.value) || false;
+    });
+  }
+
+  function loadCasesFromStorage() {
+    try {
+      const raw = localStorage.getItem(CASE_KEY);
+      if (!raw) return [];
+      const arr = JSON.parse(raw);
+      if (!Array.isArray(arr)) return [];
+      return arr;
+    } catch {
+      return [];
+    }
+  }
+
+  function saveCasesToStorage(arr) {
+    localStorage.setItem(CASE_KEY, JSON.stringify(arr));
+  }
+
+  function refreshCaseList() {
+    const listEl = document.getElementById("caseList");
+    const cases = loadCasesFromStorage();
+    if (!cases.length) {
+      listEl.className = "empty";
+      listEl.innerText = "目前沒有暫存案件。";
+      return;
+    }
+    listEl.className = "";
+    listEl.innerHTML = "";
+    cases
+      .slice()
+      .sort((a, b) => b.id - a.id)
+      .forEach((c) => {
+        const btn = document.createElement("button");
+        btn.className = "btn-outline case-item-btn";
+        btn.setAttribute("data-id", c.id);
+        const timeText = new Date(c.time).toLocaleString("zh-TW");
+        btn.innerHTML = `
+          <span>${c.label}</span>
+          <span class="case-item-meta">${timeText}</span>
+        `;
+        listEl.appendChild(btn);
+      });
+  }
+
+  document.getElementById("btnSaveCase").addEventListener("click", () => {
+    const labelInput = document.getElementById("caseLabel");
+    let label = (labelInput.value || "").trim();
+    const snap = getFormSnapshot();
+    if (!label) {
+      label = snap.custName ? `${snap.custName}（未命名）` : "未命名案件";
+    }
+    const cases = loadCasesFromStorage();
+    cases.push({
+      id: Date.now(),
+      label,
+      time: new Date().toISOString(),
+      form: snap
+    });
+    saveCasesToStorage(cases);
+    labelInput.value = "";
+    refreshCaseList();
+    alert("已加入暫存清單。");
+  });
+
+  document.getElementById("btnClearCases").addEventListener("click", () => {
+    if (!confirm("確定要清空所有暫存案件嗎？此動作無法恢復。")) return;
+    saveCasesToStorage([]);
+    refreshCaseList();
+  });
+
+  document.getElementById("caseList").addEventListener("click", (e) => {
+    const btn = e.target.closest("button[data-id]");
+    if (!btn) return;
+    const id = Number(btn.getAttribute("data-id"));
+    const cases = loadCasesFromStorage();
+    const found = cases.find((c) => c.id === id);
+    if (!found) return;
+    setFormSnapshot(found.form);
+    alert(`已載入暫存案件：「${found.label}」。`);
+  });
+
+  // 初始化暫存列表
+  refreshCaseList();
 </script>
 </body>
 </html>
