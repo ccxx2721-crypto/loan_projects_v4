@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <title>貸款專案推薦系統 v4</title>
+  <style>
+    body {
+      font-family: "Microsoft JhengHei", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f5f5f7;
+      margin: 0;
+      padding: 20px;
+      color: #222;
+    }
+    h1 {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+      padding: 16px 20px;
+      margin-bottom: 16px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px 16px;
+    }
+    label {
+      font-size: 13px;
+      color: #555;
+      display: block;
+      margin-bottom: 4px;
+    }
+    input[type="number"],
+    select {
+      width: 100%;
+      padding: 6px 8px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+    .checkbox-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 20px;
+      margin-top: 4px;
+    }
+    .checkbox-row label {
+      display: inline-flex;
+      align-items: center;
+      font-size: 13px;
+      margin-bottom: 0;
+    }
+    .checkbox-row input {
+      margin-right: 4px;
+    }
+    button {
+      padding: 8px 16px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      background: #2563eb;
+      color: #fff;
+      margin-top: 8px;
+    }
+    button:hover {
+      background: #1d4ed8;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-top: 8px;
+    }
+    th, td {
+      border-bottom: 1px solid #eee;
+      padding: 6px 8px;
+      vertical-align: top;
+    }
+    th {
+      background: #f3f4f6;
+      text-align: left;
+    }
+    .tag {
+      display: inline-block;
+      padding: 2px 6px;
+      font-size: 11px;
+      border-radius: 999px;
+      background: #e5e7eb;
+      margin-right: 4px;
+    }
+    .tag-premium {
+      background: #f97316;
+      color: #fff;
+    }
+    .tag-cat {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+    .small {
+      font-size: 11px;
+      color: #777;
+    }
+    .no-result {
+      padding: 8px;
+      font-size: 13px;
+      color: #555;
+    }
+    .company-group-title {
+      font-size: 13px;
+      margin-top: 10px;
+      margin-bottom: 4px;
+      color: #444;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>貸款專案推薦系統 v4</h1>
+  <div class="card">
+    <h2 style="font-size:18px;margin-top:0;">① 輸入客戶基本條件</h2>
+    <div class="grid">
+      <div>
+        <label>年齡</label>
+        <input type="number" id="age" placeholder="例如 35" />
+      </div>
+      <div>
+        <label>月收入（元）</label>
+        <input type="number" id="income" placeholder="例如 40000" />
+      </div>
+      <div>
+        <label>欲借金額（元）</label>
+        <input type="number" id="amount" placeholder="例如 300000" />
+      </div>
+      <div>
+        <label>想查看的大分類</label>
+        <select id="category">
+          <option value="ALL">全部</option>
+          <option value="房貸">房貸</option>
+          <option value="信貸">信貸</option>
+          <option value="機車貸">機車貸</option>
+          <option value="汽車貸">汽車貸</option>
+          <option value="手機貸">手機貸/商品貸</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="margin-top:10px;">
+      <label>資產 / 條件</label>
+      <div class="checkbox-row">
+        <label><input type="checkbox" id="hasHouse" />名下有房</label>
+        <label><input type="checkbox" id="hasCar" />名下有汽車</label>
+        <label><input type="checkbox" id="hasBike" />名下有機車</label>
+        <label><input type="checkbox" id="hasSalary" />有薪轉或勞保/保險</label>
+        <label><input type="checkbox" id="badCredit" />有重大信用瑕疵（協商/遲繳）</label>
+      </div>
+    </div>
+
+    <!-- 新增：可勾選公司 -->
+    <div style="margin-top:12px;">
+      <div class="company-group-title">僅顯示勾選公司的專案（若全部不勾＝顯示所有公司）</div>
+      <div class="checkbox-row">
+        <label><input type="checkbox" class="company-filter" value="新鑫">新鑫</label>
+        <label><input type="checkbox" class="company-filter" value="鼎信">鼎信</label>
+        <label><input type="checkbox" class="company-filter" value="和潤">和潤</label>
+        <label><input type="checkbox" class="company-filter" value="和裕">和裕</label>
+        <label><input type="checkbox" class="company-filter" value="融易">融易</label>
+        <label><input type="checkbox" class="company-filter" value="亞太">亞太</label>
+        <label><input type="checkbox" class="company-filter" value="21資融">21資融</label>
+        <label><input type="checkbox" class="company-filter" value="裕融">裕融</label>
+        <label><input type="checkbox" class="company-filter" value="E-Good">E-Good</label>
+        <label><input type="checkbox" class="company-filter" value="創鉅">創鉅</label>
+        <label><input type="checkbox" class="company-filter" value="瑪吉PAY">瑪吉PAY</label>
+        <label><input type="checkbox" class="company-filter" value="預付資融">預付資融</label>
+      </div>
+    </div>
+
+    <button onclick="runMatch()">開始比對專案</button>
+    <div class="small">※ 此系統為你內部判斷用，實際是否可承作仍以各公司實際審核為準。</div>
+  </div>
+
+  <div class="card">
+    <h2 style="font-size:18px;margin-top:0;">② 比對結果</h2>
+    <div id="result"></div>
+  </div>
+</div>
+
+<script>
+  // === 專案資料表 ===
+  const projects = [
+    // 房貸
+    {id:"HXIN-H-01", company:"新鑫", name:"新鑫房貸-一般專案", cat:"房貸", sub:"一般房貸",
+     premium:true, needHouse:true, needCar:false, needBike:false, needSalary:true,
+     allowBad:false, maxAmount:999999999, minAge:20, maxAge:75,
+     note:"正常房貸件，適合一般自住屋客戶。"},
+    {id:"HXIN-H-02", company:"新鑫", name:"新鑫房貸-回娘家專案", cat:"房貸", sub:"回娘家/舊客戶",
+     premium:true, needHouse:true, needCar:false, needBike:false, needSalary:true,
+     allowBad:false, maxAmount:999999999, minAge:20, maxAge:75,
+     note:"原客戶增貸或轉貸優先，文件齊全好核。"},
+    {id:"HXIN-H-03", company:"新鑫", name:"新鑫房貸-168專案", cat:"房貸", sub:"特殊/增貸",
+     premium:false, needHouse:true, needCar:false, needBike:false, needSalary:true,
+     allowBad:false, maxAmount:999999999, minAge:20, maxAge:75,
+     note:"需額外財力與繳息紀錄，比較適合資金需求大的客戶。"},
+    {id:"DING-H-01", company:"鼎信", name:"鼎信厝邊貸（二胎/三胎）", cat:"房貸", sub:"二胎/三胎",
+     premium:true, needHouse:true, needCar:false, needBike:false, needSalary:false,
+     allowBad:true, maxAmount:999999999, minAge:20, maxAge:80,
+     note:"可承作二胎/三胎，適合急件或銀行退件客戶。"},
+    {id:"HRUN-H-01", company:"和潤", name:"和潤房貸一般件", cat:"房貸", sub:"一胎房貸",
+     premium:true, needHouse:true, needCar:false, needBike:false, needSalary:true,
+     allowBad:false, maxAmount:999999999, minAge:20, maxAge:70,
+     note:"等同銀行型一胎，客戶條件好可優先考慮。"},
+    {id:"HRUN-H-02", company:"和潤", name:"和潤勁便利二胎房貸", cat:"房貸", sub:"二胎房貸",
+     premium:true, needHouse:true, needCar:false, needBike:false, needSalary:true,
+     allowBad:true, maxAmount:999999999, minAge:20, maxAge:75,
+     note:"名下自宅銀行一胎在前，可再做高成數二胎。"},
+
+    // 信貸
+    {id:"DING-C-01", company:"鼎信", name:"鼎信第一商品件", cat:"信貸", sub:"小額信貸",
+     premium:true, needHouse:false, needCar:false, needBike:false, needSalary:true,
+     allowBad:false, maxAmount:300000, minAge:20, maxAge:70,
+     note:"文件簡單的小額信貸，適合一般小額周轉。"},
+    {id:"DING-C-02", company:"鼎信", name:"鼎信鄉民小貸", cat:"信貸", sub:"小額信貸",
+     premium:false, needHouse:false, needCar:false, needBike:false, needSalary:false,
+     allowBad:true, maxAmount:120000, minAge:20, maxAge:70,
+     note:"額度較小，適合信用普通、剛出社會客戶。"},
+    {id:"DING-C-03", company:"鼎信", name:"鼎信銀行信貸專案", cat:"信貸", sub:"銀行信貸代辦",
+     premium:true, needHouse:false, needCar:false, needBike:false, needSalary:true,
+     allowBad:false, maxAmount:999999999, minAge:20, maxAge:70,
+     note:"條件好客戶，可媒合銀行做較低利率。"},
+    {id:"HEYU-C-01", company:"和裕", name:"和裕維力貸", cat:"信貸", sub:"一般信貸",
+     premium:true, needHouse:false, needCar:false, needBike:false, needSalary:true,
+     allowBad:false, maxAmount:999999, minAge:20, maxAge:70,
+     note:"有固定收入、聯徵正常即可，適合中額周轉。"},
+    {id:"REASY-C-01", company:"融易", name:"融易BOSS微企貸", cat:"信貸", sub:"微型企業貸",
+     premium:true, needHouse:false, needCar:false, needBike:false, needSalary:true,
+     allowBad:true, maxAmount:999999, minAge:20, maxAge:75,
+     note:"有營登或店面的小老闆可用，營收好就好談。"},
+    {id:"REASY-C-02", company:"融易", name:"融易頭家貸", cat:"信貸", sub:"老闆貸",
+     premium:true, needHouse:false, needCar:false, needBike:false, needSalary:true,
+     allowBad:true, maxAmount:999999, minAge:20, maxAge:75,
+     note:"攤商、工作室等可用，配合營收資料。"},
+    {id:"REASY-C-03", company:"融易", name:"融易特加專案", cat:"信貸", sub:"加額專案",
+     premium:false, needHouse:false, needCar:false, needBike:false, needSalary:true,
+     allowBad:true, maxAmount:100000, minAge:20, maxAge:75,
+     note:"搭原本專案再加小額度用。"},
+    {id:"APTA-C-01", company:"亞太", name:"亞太職業工會貸", cat:"信貸", sub:"工會貸",
+     premium:false, needHouse:false, needCar:false, needBike:false, needSalary:true,
+     allowBad:true, maxAmount:300000, minAge:20, maxAge:70,
+     note:"需加入職業工會，可與機車或手機一起設計。"},
+
+    // 機車
+    {id:"21M-01", company:"21資融", name:"21資融機車25專案", cat:"機車貸", sub:"一般機車貸",
+     premium:true, needHouse:false, needCar:false, needBike:true, needSalary:true,
+     allowBad:true, maxAmount:250000, minAge:20, maxAge:70,
+     note:"名下有機車且持有半年，適合大多數客戶。"},
+    {id:"APTA-M-01", company:"亞太", name:"亞太機車代償專案", cat:"機車貸", sub:"代償",
+     premium:true, needHouse:false, needCar:false, needBike:true, needSalary:true,
+     allowBad:true, maxAmount:300000, minAge:20, maxAge:70,
+     note:"原本機車分期繳一段時間，可代償他家換資金。"},
+    {id:"APTA-M-02", company:"亞太", name:"亞太機車動擔設定專案", cat:"機車貸", sub:"動擔設定(不代償)",
+     premium:true, needHouse:false, needCar:false, needBike:true, needSalary:false,
+     allowBad:true, maxAmount:250000, minAge:20, maxAge:70,
+     note:"名下有機車即可設定抵押，不一定要原本有分期。"},
+    {id:"APTA-M-03", company:"亞太", name:"亞太工會機車專案", cat:"機車貸", sub:"工會機車",
+     premium:false, needHouse:false, needCar:false, needBike:true, needSalary:true,
+     allowBad:true, maxAmount:250000, minAge:20, maxAge:70,
+     note:"同時具備工會＋機車，條件好可以優化。"},
+    {id:"HRUN-M-01", company:"和潤", name:"和潤重機專案", cat:"機車貸", sub:"重機貸",
+     premium:true, needHouse:false, needCar:false, needBike:true, needSalary:true,
+     allowBad:false, maxAmount:300000, minAge:20, maxAge:70,
+     note:"大型重機、有完善保險與信用正常者。"},
+    {id:"CHUANG-M-01", company:"創鉅", name:"創鉅機車貸", cat:"機車貸", sub:"一般機車貸",
+     premium:false, needHouse:false, needCar:false, needBike:true, needSalary:false,
+     allowBad:true, maxAmount:100000, minAge:20, maxAge:70,
+     note:"小額機車增貸，手續費固定好算。"},
+    {id:"REASY-M-01", company:"融易", name:"融易機車貸款", cat:"機車貸", sub:"一般/代償",
+     premium:true, needHouse:false, needCar:false, needBike:true, needSalary:true,
+     allowBad:true, maxAmount:300000, minAge:20, maxAge:70,
+     note:"一般＋代償都可談，包容度高。"},
+
+    // 汽車
+    {id:"TAC-CAR-01", company:"裕融", name:"裕融TAC原融", cat:"汽車貸", sub:"原車融資",
+     premium:true, needHouse:false, needCar:true, needBike:false, needSalary:true,
+     allowBad:false, maxAmount:999999, minAge:20, maxAge:75,
+     note:"汽車拿去融資，信用正常者額度高。"},
+    {id:"TAC-CAR-02", company:"裕融", name:"裕融TAC買賣", cat:"汽車貸", sub:"買賣分期",
+     premium:true, needHouse:false, needCar:false, needBike:false, needSalary:true,
+     allowBad:false, maxAmount:999999, minAge:20, maxAge:75,
+     note:"新車或中古車買車分期專用。"},
+    {id:"HRUN-CAR-01", company:"和潤", name:"和潤汽車4+2專案", cat:"汽車貸", sub:"汽車+機車4+2",
+     premium:false, needHouse:false, needCar:true, needBike:true, needSalary:true,
+     allowBad:true, maxAmount:999999, minAge:20, maxAge:70,
+     note:"汽車＋機車同時進件的套案，可談更高額度。"},
+    {id:"EGOOD-CAR-01", company:"E-Good", name:"優質汽車(信貸)E-Good O", cat:"汽車貸", sub:"汽車信貸",
+     premium:true, needHouse:false, needCar:true, needBike:false, needSalary:true,
+     allowBad:false, maxAmount:300000, minAge:20, maxAge:70,
+     note:"以車作為背後條件的信貸，期數短、周轉快。"},    
+
+    // 手機 / 商品
+    {id:"21P-01", company:"21資融", name:"21AB A商品/手機貸", cat:"手機貸", sub:"一般商品/手機",
+     premium:true, needHouse:false, needCar:false, needBike:false, needSalary:false,
+     allowBad:true, maxAmount:120000, minAge:20, maxAge:70,
+     note:"條件最寬鬆的小額商品/手機分期。"},
+    {id:"21P-02", company:"21資融", name:"21AB B商品/手機貸", cat:"手機貸", sub:"加強型商品貸",
+     premium:false, needHouse:false, needCar:false, needBike:false, needSalary:true,
+     allowBad:true, maxAmount:120000, minAge:20, maxAge:70,
+     note:"A案不行可改送B案補量。"},
+    {id:"APTA-P-01", company:"亞太", name:"亞太手機小額專案", cat:"手機貸", sub:"一般手機貸",
+     premium:true, needHouse:false, needCar:false, needBike:false, needSalary:true,
+     allowBad:true, maxAmount:80000, minAge:20, maxAge:70,
+     note:"需智慧手機+IMEI與基本文件。"},
+    {id:"DING-P-01", company:"鼎信", name:"鼎信手機貸(買賣件)", cat:"手機貸", sub:"買賣型手機貸",
+     premium:false, needHouse:false, needCar:false, needBike:false, needSalary:false,
+     allowBad:true, maxAmount:60000, minAge:20, maxAge:70,
+     note:"走買賣流程，適合信用較弱需手機或小額的客戶。"},
+    {id:"CHUANG-P-01", company:"創鉅", name:"創鉅手機貸(型號限定)", cat:"手機貸", sub:"型號貸",
+     premium:true, needHouse:false, needCar:false, needBike:false, needSalary:true,
+     allowBad:true, maxAmount:60000, minAge:20, maxAge:70,
+     note:"限定型號，核准率高，手續費內扣2000。"},
+    {id:"MAGI-P-01", company:"瑪吉PAY", name:"瑪吉PAY手機貸", cat:"手機貸", sub:"基數表手機貸",
+     premium:true, needHouse:false, needCar:false, needBike:false, needSalary:true,
+     allowBad:true, maxAmount:100000, minAge:20, maxAge:70,
+     note:"依基數表核貸，額度與費用透明。"},
+    {id:"YUFU-P-01", company:"預付資融", name:"預付資融手機/重機專案", cat:"手機貸", sub:"手機+重機混合",
+     premium:false, needHouse:false, needCar:false, needBike:true, needSalary:true,
+     allowBad:true, maxAmount:200000, minAge:20, maxAge:70,
+     note:"手機或重機一起做的通路專案。"}
+  ];
+
+  function runMatch() {
+    const age = Number(document.getElementById("age").value || 0);
+    const income = Number(document.getElementById("income").value || 0);
+    const amount = Number(document.getElementById("amount").value || 0);
+    const cat = document.getElementById("category").value;
+
+    const hasHouse = document.getElementById("hasHouse").checked;
+    const hasCar = document.getElementById("hasCar").checked;
+    const hasBike = document.getElementById("hasBike").checked;
+    const hasSalary = document.getElementById("hasSalary").checked;
+    const badCredit = document.getElementById("badCredit").checked;
+
+    // 讀取勾選的公司
+    const companyCheckboxes = document.querySelectorAll('.company-filter');
+    const selectedCompanies = Array.from(companyCheckboxes)
+      .filter(cb => cb.checked)
+      .map(cb => cb.value);
+
+    let filtered = projects.filter(p => {
+      // 大分類
+      if (cat !== "ALL" && p.cat !== (cat === "手機貸" ? "手機貸" : cat)) return false;
+
+      // 公司篩選（若有勾至少一間，只顯示勾到的）
+      if (selectedCompanies.length > 0 && !selectedCompanies.includes(p.company)) {
+        return false;
+      }
+
+      // 年齡
+      if (p.minAge && age && age < p.minAge) return false;
+      if (p.maxAge && age && age > p.maxAge) return false;
+
+      // 金額
+      if (p.maxAmount && amount && amount > p.maxAmount) return false;
+
+      // 條件
+      if (p.needHouse && !hasHouse) return false;
+      if (p.needCar && !hasCar) return false;
+      if (p.needBike && !hasBike) return false;
+      if (p.needSalary && !hasSalary) return false;
+      if (!p.allowBad && badCredit) return false;
+
+      // 簡單收入門檻：借款超過月收 30 倍就排除
+      if (income && amount && amount > income * 30) return false;
+
+      return true;
+    });
+
+    // 排序：優質優先，再依類別、代碼
+    filtered.sort((a, b) => {
+      if (a.premium !== b.premium) return a.premium ? -1 : 1;
+      if (a.cat !== b.cat) return a.cat.localeCompare(b.cat);
+      return a.id.localeCompare(b.id);
+    });
+
+    const container = document.getElementById("result");
+    if (!filtered.length) {
+      container.innerHTML = '<div class="no-result">目前沒有明顯適合的專案，可以調整公司勾選或條件再試一次。</div>';
+      return;
+    }
+
+    let html = '<table><thead><tr>' +
+      '<th>代碼</th><th>公司</th><th>專案名稱</th><th>類別</th><th>細分類</th><th>說明 / 判斷重點</th>' +
+      '</tr></thead><tbody>';
+
+    filtered.forEach(p => {
+      html += '<tr>' +
+        `<td>${p.id}</td>` +
+        `<td>${p.company}</td>` +
+        `<td>${p.name} ${p.premium ? '<span class="tag tag-premium">⭐ 優質</span>' : ''}</td>` +
+        `<td><span class="tag tag-cat">${p.cat}</span></td>` +
+        `<td>${p.sub}</td>` +
+        `<td>${p.note}</td>` +
+        '</tr>';
+    });
+
+    html += '</tbody></table>';
+    container.innerHTML = html;
+  }
+</script>
+</body>
+</html>
