@@ -2,419 +2,1184 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <title>貸款專案推薦系統 v4</title>
+  <title>貸款智能分析系統 v7</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
+    :root {
+      --primary: #2563eb;
+      --primary-soft: #dbeafe;
+      --danger: #dc2626;
+      --bg: #f4f5fb;
+      --card: #ffffff;
+      --border: #e5e7eb;
+      --text: #111827;
+      --muted: #6b7280;
+      --success: #16a34a;
+      --warning: #f97316;
+      --radius-lg: 16px;
+      --radius-md: 10px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: "Microsoft JhengHei", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #f5f5f7;
       margin: 0;
-      padding: 20px;
-      color: #222;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+        "Microsoft JhengHei", system-ui, sans-serif;
+      background: radial-gradient(circle at top, #e0edff 0, #f4f5fb 40%, #f4f5fb 100%);
+      color: var(--text);
     }
-    h1 {
-      font-size: 24px;
-      margin-bottom: 10px;
-    }
-    .container {
+
+    .app {
       max-width: 1200px;
       margin: 0 auto;
+      padding: 16px;
     }
-    .card {
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.06);
-      padding: 16px 20px;
+
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
       margin-bottom: 16px;
     }
-    .grid {
+
+    header h1 {
+      margin: 0;
+      font-size: 22px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    header h1 span.logo {
+      width: 32px;
+      height: 32px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #6366f1, #ec4899);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 700;
+      font-size: 18px;
+    }
+
+    header .subtitle {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .pill {
+      background: #eef2ff;
+      color: #4f46e5;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .layout {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 12px 16px;
+      grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+      gap: 16px;
     }
-    label {
+
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 18px 30px rgba(15, 23, 42, 0.08);
+      padding: 14px 14px 16px;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+    }
+
+    .card h2 {
+      margin: 0 0 8px;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .card h2 span.icon {
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      background: var(--primary-soft);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       font-size: 13px;
-      color: #555;
-      display: block;
-      margin-bottom: 4px;
+      color: var(--primary);
     }
+
+    .card-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .card-sub {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    @media (max-width: 600px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    label {
+      font-size: 12px;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 2px;
+    }
+
     input[type="number"],
     select {
       width: 100%;
       padding: 6px 8px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      font-size: 14px;
-      box-sizing: border-box;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      font-size: 13px;
+      outline: none;
+      background: #f9fafb;
     }
+
+    input[type="number"]:focus,
+    select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.25);
+      background: #fff;
+    }
+
     .checkbox-row {
       display: flex;
       flex-wrap: wrap;
-      gap: 10px 20px;
+      gap: 6px 16px;
       margin-top: 4px;
     }
+
     .checkbox-row label {
       display: inline-flex;
       align-items: center;
-      font-size: 13px;
+      gap: 4px;
+      font-size: 12px;
       margin-bottom: 0;
     }
+
     .checkbox-row input {
-      margin-right: 4px;
+      width: 14px;
+      height: 14px;
     }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
     button {
-      padding: 8px 16px;
       border-radius: 999px;
       border: none;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 600;
-      background: #2563eb;
-      color: #fff;
-      margin-top: 8px;
-    }
-    button:hover {
-      background: #1d4ed8;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
+      padding: 7px 14px;
       font-size: 13px;
-      margin-top: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
-    th, td {
-      border-bottom: 1px solid #eee;
-      padding: 6px 8px;
-      vertical-align: top;
-    }
-    th {
-      background: #f3f4f6;
-      text-align: left;
-    }
-    .tag {
-      display: inline-block;
-      padding: 2px 6px;
-      font-size: 11px;
-      border-radius: 999px;
-      background: #e5e7eb;
-      margin-right: 4px;
-    }
-    .tag-premium {
-      background: #f97316;
+
+    .btn-primary {
+      background: var(--primary);
       color: #fff;
     }
-    .tag-cat {
+
+    .btn-primary:active {
+      transform: translateY(1px);
+    }
+
+    .btn-outline {
+      background: #fff;
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      border-radius: 999px;
+      font-size: 10px;
+      background: #f3f4f6;
+      color: #4b5563;
+      margin-right: 4px;
+      margin-bottom: 2px;
+    }
+
+    .tag-primary {
       background: #dbeafe;
       color: #1d4ed8;
     }
-    .small {
-      font-size: 11px;
-      color: #777;
+
+    .tag-green {
+      background: #dcfce7;
+      color: #15803d;
     }
-    .no-result {
-      padding: 8px;
-      font-size: 13px;
-      color: #555;
+
+    .tag-orange {
+      background: #ffedd5;
+      color: #ea580c;
     }
-    .company-group-title {
-      font-size: 13px;
-      margin-top: 10px;
+
+    .tag-red {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+
+    .tab {
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      border: 1px solid transparent;
+      background: transparent;
+      cursor: pointer;
+      color: var(--muted);
+    }
+
+    .tab.active {
+      background: #eff6ff;
+      color: #1d4ed8;
+      border-color: #bfdbfe;
+      font-weight: 500;
+    }
+
+    .projects-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 10px;
+      max-height: 500px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .project-card {
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      padding: 10px 10px 8px;
+      background: #ffffff;
+      position: relative;
+    }
+
+    .project-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+      align-items: flex-start;
       margin-bottom: 4px;
-      color: #444;
+    }
+
+    .project-title {
+      font-size: 13px;
       font-weight: 600;
+    }
+
+    .badge-level {
+      font-size: 11px;
+      border-radius: 999px;
+      padding: 2px 7px;
+      background: #e5f4ff;
+      color: #0369a1;
+      white-space: nowrap;
+    }
+
+    .badge-level.level-top {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .project-meta {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .project-meta span {
+      margin-right: 8px;
+    }
+
+    .reason {
+      font-size: 11px;
+      color: #4b5563;
+      background: #f9fafb;
+      border-radius: 8px;
+      padding: 4px 6px;
+      margin-top: 4px;
+    }
+
+    .section-title {
+      font-size: 12px;
+      font-weight: 600;
+      margin: 6px 0 2px;
+    }
+
+    .calc-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    @media (max-width: 800px) {
+      .calc-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .calc-result {
+      font-size: 12px;
+      margin-top: 4px;
+      color: var(--success);
+    }
+
+    .footer-note {
+      margin-top: 10px;
+      font-size: 10px;
+      color: var(--muted);
+      text-align: right;
+    }
+
+    .chip-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .chip {
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #f9fafb;
+      font-size: 11px;
+      cursor: pointer;
+    }
+
+    .chip.active {
+      background: #2563eb;
+      color: #fff;
+      border-color: #1d4ed8;
+    }
+
+    .empty {
+      font-size: 12px;
+      color: var(--muted);
+      background: #f9fafb;
+      border-radius: 10px;
+      padding: 8px;
     }
   </style>
 </head>
 <body>
-<div class="container">
-  <h1>貸款專案推薦系統 v4</h1>
-  <div class="card">
-    <h2 style="font-size:18px;margin-top:0;">① 輸入客戶基本條件</h2>
-    <div class="grid">
-      <div>
-        <label>年齡</label>
-        <input type="number" id="age" placeholder="例如 35" />
+<div class="app">
+  <header>
+    <div>
+      <h1>
+        <span class="logo">L</span>
+        貸款智能分析系統 <span style="font-size:12px;color:#6b7280;">v7</span>
+      </h1>
+      <div class="subtitle">
+        一次輸入客戶條件 ➜ 自動配對房貸 / 信貸 / 手機 / 車貸 / 二三胎專案，並提供月付試算
       </div>
-      <div>
-        <label>月收入（元）</label>
-        <input type="number" id="income" placeholder="例如 40000" />
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+      <div class="pill">✅ 無需安裝 App，手機直接打開網址即可使用</div>
+      <div style="font-size:10px;color:#9ca3af;">資料僅儲存在你本機瀏覽器，不上傳伺服器。</div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <!-- 左側：客戶條件 + 計算機 -->
+    <section class="card">
+      <div class="card-header-row">
+        <h2><span class="icon">👤</span> 客戶條件（AI 智能推薦）</h2>
       </div>
-      <div>
-        <label>欲借金額（元）</label>
-        <input type="number" id="amount" placeholder="例如 300000" />
+      <div class="card-sub">
+        填越完整，推薦越準確。未填欄位視為「不限」。
       </div>
-      <div>
-        <label>想查看的大分類</label>
-        <select id="category">
-          <option value="ALL">全部</option>
-          <option value="房貸">房貸</option>
-          <option value="信貸">信貸</option>
-          <option value="機車貸">機車貸</option>
-          <option value="汽車貸">汽車貸</option>
-          <option value="手機貸">手機貸/商品貸</option>
+
+      <div class="form-grid" style="margin-top:6px;">
+        <div>
+          <label>年齡</label>
+          <input type="number" id="age" placeholder="例：30" min="18" max="80" />
+        </div>
+        <div>
+          <label>月收入（實領）</label>
+          <input type="number" id="income" placeholder="例：42000" min="0" />
+        </div>
+        <div>
+          <label>聯徵分數 / 內評（大約）</label>
+          <input type="number" id="score" placeholder="例：600" min="300" max="900" />
+        </div>
+        <div>
+          <label>在職年資（年）</label>
+          <input type="number" id="years" placeholder="例：2" min="0" step="0.5" />
+        </div>
+      </div>
+
+      <div style="margin-top:6px;">
+        <label>目前持有資產 / 身份（可複選）</label>
+        <div class="checkbox-row">
+          <label><input type="checkbox" id="hasPayroll" /> 有薪轉</label>
+          <label><input type="checkbox" id="hasLabor" /> 有勞保 / 健保</label>
+          <label><input type="checkbox" id="hasHouse" /> 名下有房</label>
+          <label><input type="checkbox" id="hasCar" /> 名下有汽車</label>
+          <label><input type="checkbox" id="hasBike" /> 名下有機車</label>
+          <label><input type="checkbox" id="isUnion" /> 工會投保</label>
+        </div>
+      </div>
+
+      <div style="margin-top:6px;">
+        <label>客戶信用狀況大致評估</label>
+        <select id="creditStatus">
+          <option value="">未指定</option>
+          <option value="top">優質（無遲繳、無債務協商）</option>
+          <option value="normal">一般正常</option>
+          <option value="weak">稍弱（偶有遲繳）</option>
+          <option value="bad">瑕疵（協商、強停、呆帳等）</option>
         </select>
       </div>
-    </div>
 
-    <div style="margin-top:10px;">
-      <label>資產 / 條件</label>
-      <div class="checkbox-row">
-        <label><input type="checkbox" id="hasHouse" />名下有房</label>
-        <label><input type="checkbox" id="hasCar" />名下有汽車</label>
-        <label><input type="checkbox" id="hasBike" />名下有機車</label>
-        <label><input type="checkbox" id="hasSalary" />有薪轉或勞保/保險</label>
-        <label><input type="checkbox" id="badCredit" />有重大信用瑕疵（協商/遲繳）</label>
+      <div style="margin-top:6px;">
+        <label>希望方案類別（可複選）</label>
+        <div class="chip-group" id="typeChips">
+          <!-- JS 產生 -->
+        </div>
       </div>
-    </div>
 
-    <!-- 新增：可勾選公司 -->
-    <div style="margin-top:12px;">
-      <div class="company-group-title">僅顯示勾選公司的專案（若全部不勾＝顯示所有公司）</div>
-      <div class="checkbox-row">
-        <label><input type="checkbox" class="company-filter" value="新鑫">新鑫</label>
-        <label><input type="checkbox" class="company-filter" value="鼎信">鼎信</label>
-        <label><input type="checkbox" class="company-filter" value="和潤">和潤</label>
-        <label><input type="checkbox" class="company-filter" value="和裕">和裕</label>
-        <label><input type="checkbox" class="company-filter" value="融易">融易</label>
-        <label><input type="checkbox" class="company-filter" value="亞太">亞太</label>
-        <label><input type="checkbox" class="company-filter" value="21資融">21資融</label>
-        <label><input type="checkbox" class="company-filter" value="裕融">裕融</label>
-        <label><input type="checkbox" class="company-filter" value="E-Good">E-Good</label>
-        <label><input type="checkbox" class="company-filter" value="創鉅">創鉅</label>
-        <label><input type="checkbox" class="company-filter" value="瑪吉PAY">瑪吉PAY</label>
-        <label><input type="checkbox" class="company-filter" value="預付資融">預付資融</label>
+      <div style="margin-top:6px;">
+        <label>只看哪些公司（可多選，不選=全部）</label>
+        <div class="chip-group" id="companyChips">
+          <!-- JS 產生 -->
+        </div>
       </div>
-    </div>
 
-    <button onclick="runMatch()">開始比對專案</button>
-    <div class="small">※ 此系統為你內部判斷用，實際是否可承作仍以各公司實際審核為準。</div>
-  </div>
+      <div class="btn-row">
+        <button class="btn-primary" id="btnRecommend">⚡ 產生 AI 推薦</button>
+        <button class="btn-outline" id="btnReset">清空條件</button>
+      </div>
 
-  <div class="card">
-    <h2 style="font-size:18px;margin-top:0;">② 比對結果</h2>
-    <div id="result"></div>
+      <!-- 計算機 v7 -->
+      <div style="margin-top:14px;border-top:1px dashed #e5e7eb;padding-top:10px;">
+        <div class="card-header-row">
+          <h2><span class="icon">🧮</span> 快速試算（月付 / 成數）</h2>
+        </div>
+        <div class="calc-grid">
+          <div>
+            <div class="section-title">等額本息月付試算（信貸 / 車貸 / 手機）</div>
+            <div class="form-grid" style="grid-template-columns:1fr 1fr;gap:6px;">
+              <div>
+                <label>貸款金額</label>
+                <input type="number" id="calcAmount" placeholder="100000" />
+              </div>
+              <div>
+                <label>期數（月）</label>
+                <input type="number" id="calcMonths" placeholder="36" />
+              </div>
+              <div>
+                <label>年利率（%）</label>
+                <input type="number" id="calcRate" placeholder="10" step="0.1" />
+              </div>
+            </div>
+            <div class="btn-row" style="margin-top:6px;">
+              <button class="btn-outline" id="btnCalcPay">計算月付</button>
+            </div>
+            <div class="calc-result" id="calcPayResult"></div>
+          </div>
+
+          <div>
+            <div class="section-title">房貸成數/二胎試算（簡易版）</div>
+            <div class="form-grid" style="grid-template-columns:1fr 1fr;gap:6px;">
+              <div>
+                <label>房屋估價</label>
+                <input type="number" id="houseValue" placeholder="6000000" />
+              </div>
+              <div>
+                <label>現有一胎餘額</label>
+                <input type="number" id="firstLoan" placeholder="3000000" />
+              </div>
+              <div>
+                <label>最高成數（%）</label>
+                <input type="number" id="maxLtv" placeholder="80" step="1" />
+              </div>
+            </div>
+            <div class="btn-row" style="margin-top:6px;">
+              <button class="btn-outline" id="btnCalcSecond">計算可做二胎額度</button>
+            </div>
+            <div class="calc-result" id="calcSecondResult"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-note">
+        ※ 本系統僅協助你快速篩選專案與試算金額，實際核准與條件以各銀行 / 金融公司為準。
+      </div>
+    </section>
+
+    <!-- 右側：推薦結果 + 專案列表 -->
+    <section class="card">
+      <div class="card-header-row">
+        <h2><span class="icon">📋</span> AI 推薦結果與所有專案</h2>
+        <div class="card-sub" id="summaryText">請先輸入左側條件並按「產生 AI 推薦」</div>
+      </div>
+
+      <div class="tabs" id="resultTabs">
+        <button class="tab active" data-tab="best">⭐ 最適合推薦</button>
+        <button class="tab" data-tab="backup">✅ 可備選方案</button>
+        <button class="tab" data-tab="all">📚 全部專案列表</button>
+      </div>
+
+      <div id="tabContent">
+        <!-- JS 填入 -->
+      </div>
+    </section>
   </div>
 </div>
 
 <script>
-  // === 專案資料表 ===
-  const projects = [
-    // 房貸
-    {id:"HXIN-H-01", company:"新鑫", name:"新鑫房貸-一般專案", cat:"房貸", sub:"一般房貸",
-     premium:true, needHouse:true, needCar:false, needBike:false, needSalary:true,
-     allowBad:false, maxAmount:999999999, minAge:20, maxAge:75,
-     note:"正常房貸件，適合一般自住屋客戶。"},
-    {id:"HXIN-H-02", company:"新鑫", name:"新鑫房貸-回娘家專案", cat:"房貸", sub:"回娘家/舊客戶",
-     premium:true, needHouse:true, needCar:false, needBike:false, needSalary:true,
-     allowBad:false, maxAmount:999999999, minAge:20, maxAge:75,
-     note:"原客戶增貸或轉貸優先，文件齊全好核。"},
-    {id:"HXIN-H-03", company:"新鑫", name:"新鑫房貸-168專案", cat:"房貸", sub:"特殊/增貸",
-     premium:false, needHouse:true, needCar:false, needBike:false, needSalary:true,
-     allowBad:false, maxAmount:999999999, minAge:20, maxAge:75,
-     note:"需額外財力與繳息紀錄，比較適合資金需求大的客戶。"},
-    {id:"DING-H-01", company:"鼎信", name:"鼎信厝邊貸（二胎/三胎）", cat:"房貸", sub:"二胎/三胎",
-     premium:true, needHouse:true, needCar:false, needBike:false, needSalary:false,
-     allowBad:true, maxAmount:999999999, minAge:20, maxAge:80,
-     note:"可承作二胎/三胎，適合急件或銀行退件客戶。"},
-    {id:"HRUN-H-01", company:"和潤", name:"和潤房貸一般件", cat:"房貸", sub:"一胎房貸",
-     premium:true, needHouse:true, needCar:false, needBike:false, needSalary:true,
-     allowBad:false, maxAmount:999999999, minAge:20, maxAge:70,
-     note:"等同銀行型一胎，客戶條件好可優先考慮。"},
-    {id:"HRUN-H-02", company:"和潤", name:"和潤勁便利二胎房貸", cat:"房貸", sub:"二胎房貸",
-     premium:true, needHouse:true, needCar:false, needBike:false, needSalary:true,
-     allowBad:true, maxAmount:999999999, minAge:20, maxAge:75,
-     note:"名下自宅銀行一胎在前，可再做高成數二胎。"},
+/* =========================
+   1. 專案資料（你可以自行增加/修改）
+   ========================= */
 
-    // 信貸
-    {id:"DING-C-01", company:"鼎信", name:"鼎信第一商品件", cat:"信貸", sub:"小額信貸",
-     premium:true, needHouse:false, needCar:false, needBike:false, needSalary:true,
-     allowBad:false, maxAmount:300000, minAge:20, maxAge:70,
-     note:"文件簡單的小額信貸，適合一般小額周轉。"},
-    {id:"DING-C-02", company:"鼎信", name:"鼎信鄉民小貸", cat:"信貸", sub:"小額信貸",
-     premium:false, needHouse:false, needCar:false, needBike:false, needSalary:false,
-     allowBad:true, maxAmount:120000, minAge:20, maxAge:70,
-     note:"額度較小，適合信用普通、剛出社會客戶。"},
-    {id:"DING-C-03", company:"鼎信", name:"鼎信銀行信貸專案", cat:"信貸", sub:"銀行信貸代辦",
-     premium:true, needHouse:false, needCar:false, needBike:false, needSalary:true,
-     allowBad:false, maxAmount:999999999, minAge:20, maxAge:70,
-     note:"條件好客戶，可媒合銀行做較低利率。"},
-    {id:"HEYU-C-01", company:"和裕", name:"和裕維力貸", cat:"信貸", sub:"一般信貸",
-     premium:true, needHouse:false, needCar:false, needBike:false, needSalary:true,
-     allowBad:false, maxAmount:999999, minAge:20, maxAge:70,
-     note:"有固定收入、聯徵正常即可，適合中額周轉。"},
-    {id:"REASY-C-01", company:"融易", name:"融易BOSS微企貸", cat:"信貸", sub:"微型企業貸",
-     premium:true, needHouse:false, needCar:false, needBike:false, needSalary:true,
-     allowBad:true, maxAmount:999999, minAge:20, maxAge:75,
-     note:"有營登或店面的小老闆可用，營收好就好談。"},
-    {id:"REASY-C-02", company:"融易", name:"融易頭家貸", cat:"信貸", sub:"老闆貸",
-     premium:true, needHouse:false, needCar:false, needBike:false, needSalary:true,
-     allowBad:true, maxAmount:999999, minAge:20, maxAge:75,
-     note:"攤商、工作室等可用，配合營收資料。"},
-    {id:"REASY-C-03", company:"融易", name:"融易特加專案", cat:"信貸", sub:"加額專案",
-     premium:false, needHouse:false, needCar:false, needBike:false, needSalary:true,
-     allowBad:true, maxAmount:100000, minAge:20, maxAge:75,
-     note:"搭原本專案再加小額度用。"},
-    {id:"APTA-C-01", company:"亞太", name:"亞太職業工會貸", cat:"信貸", sub:"工會貸",
-     premium:false, needHouse:false, needCar:false, needBike:false, needSalary:true,
-     allowBad:true, maxAmount:300000, minAge:20, maxAge:70,
-     note:"需加入職業工會，可與機車或手機一起設計。"},
+const projects = [
+  /* 房貸 / 二胎 */
+  {
+    id: "hx_house_2nd",
+    name: "鼎信 厝邊貸（二胎房貸）",
+    company: "鼎信",
+    type: "二胎",
+    level: "一般",
+    preferLevel: "normal",
+    minAge: 18,
+    maxAge: 80,
+    needHouse: true,
+    needBike: false,
+    needCar: false,
+    needPayroll: false,
+    needLabor: false,
+    minScore: 0,
+    minIncome: 0,
+    tags: ["房貸", "二胎", "代償整合"],
+    rate: "約 10%~24%",
+    terms: "最長 240 期",
+    note: "需名下有房，可做整合、增貸，部分案件可先撥後補件。",
+  },
+  {
+    id: "xx_house_prime",
+    name: "新鑫 房貸 優質一般專案",
+    company: "新鑫",
+    type: "房貸",
+    level: "優質",
+    preferLevel: "top",
+    minAge: 20,
+    maxAge: 70,
+    needHouse: true,
+    needPayroll: false,
+    needLabor: false,
+    minScore: 620,
+    minIncome: 30000,
+    tags: ["房貸", "一胎", "銀行件"],
+    rate: "依銀行公告",
+    terms: "最長 300 期",
+    note: "客戶條件佳時，可優先考慮銀行房貸，新鑫協助銜接與作業。",
+  },
 
-    // 機車
-    {id:"21M-01", company:"21資融", name:"21資融機車25專案", cat:"機車貸", sub:"一般機車貸",
-     premium:true, needHouse:false, needCar:false, needBike:true, needSalary:true,
-     allowBad:true, maxAmount:250000, minAge:20, maxAge:70,
-     note:"名下有機車且持有半年，適合大多數客戶。"},
-    {id:"APTA-M-01", company:"亞太", name:"亞太機車代償專案", cat:"機車貸", sub:"代償",
-     premium:true, needHouse:false, needCar:false, needBike:true, needSalary:true,
-     allowBad:true, maxAmount:300000, minAge:20, maxAge:70,
-     note:"原本機車分期繳一段時間，可代償他家換資金。"},
-    {id:"APTA-M-02", company:"亞太", name:"亞太機車動擔設定專案", cat:"機車貸", sub:"動擔設定(不代償)",
-     premium:true, needHouse:false, needCar:false, needBike:true, needSalary:false,
-     allowBad:true, maxAmount:250000, minAge:20, maxAge:70,
-     note:"名下有機車即可設定抵押，不一定要原本有分期。"},
-    {id:"APTA-M-03", company:"亞太", name:"亞太工會機車專案", cat:"機車貸", sub:"工會機車",
-     premium:false, needHouse:false, needCar:false, needBike:true, needSalary:true,
-     allowBad:true, maxAmount:250000, minAge:20, maxAge:70,
-     note:"同時具備工會＋機車，條件好可以優化。"},
-    {id:"HRUN-M-01", company:"和潤", name:"和潤重機專案", cat:"機車貸", sub:"重機貸",
-     premium:true, needHouse:false, needCar:false, needBike:true, needSalary:true,
-     allowBad:false, maxAmount:300000, minAge:20, maxAge:70,
-     note:"大型重機、有完善保險與信用正常者。"},
-    {id:"CHUANG-M-01", company:"創鉅", name:"創鉅機車貸", cat:"機車貸", sub:"一般機車貸",
-     premium:false, needHouse:false, needCar:false, needBike:true, needSalary:false,
-     allowBad:true, maxAmount:100000, minAge:20, maxAge:70,
-     note:"小額機車增貸，手續費固定好算。"},
-    {id:"REASY-M-01", company:"融易", name:"融易機車貸款", cat:"機車貸", sub:"一般/代償",
-     premium:true, needHouse:false, needCar:false, needBike:true, needSalary:true,
-     allowBad:true, maxAmount:300000, minAge:20, maxAge:70,
-     note:"一般＋代償都可談，包容度高。"},
+  /* 信貸 / 機車 / 汽車 / 手機 – 和潤 */
+  {
+    id: "hr_car_4p2",
+    name: "和潤 汽車原融/機車原融 4+2 專案",
+    company: "和潤",
+    type: "汽車",
+    level: "優質",
+    preferLevel: "normal",
+    minAge: 20,
+    maxAge: 70,
+    needCar: true,
+    needPayroll: false,
+    needLabor: false,
+    minScore: 560,
+    minIncome: 25000,
+    tags: ["汽車貸", "原車融資", "他行代償"],
+    rate: "約 8.5%~16%",
+    terms: "12~84 期",
+    note: "名下有汽車即可評估，可做他行代償或增貸，額度較彈性。",
+  },
+  {
+    id: "hr_bike",
+    name: "和潤 機車原融 一般/超U",
+    company: "和潤",
+    type: "機車",
+    level: "一般",
+    preferLevel: "normal",
+    minAge: 20,
+    maxAge: 70,
+    needBike: true,
+    minScore: 540,
+    minIncome: 20000,
+    tags: ["機車貸", "原車融資"],
+    rate: "約 8.5%~16%",
+    terms: "12~60 期",
+    note: "名下有機車即可評估，舊件可代償重新拉長期數、降月付。",
+  },
 
-    // 汽車
-    {id:"TAC-CAR-01", company:"裕融", name:"裕融TAC原融", cat:"汽車貸", sub:"原車融資",
-     premium:true, needHouse:false, needCar:true, needBike:false, needSalary:true,
-     allowBad:false, maxAmount:999999, minAge:20, maxAge:75,
-     note:"汽車拿去融資，信用正常者額度高。"},
-    {id:"TAC-CAR-02", company:"裕融", name:"裕融TAC買賣", cat:"汽車貸", sub:"買賣分期",
-     premium:true, needHouse:false, needCar:false, needBike:false, needSalary:true,
-     allowBad:false, maxAmount:999999, minAge:20, maxAge:75,
-     note:"新車或中古車買車分期專用。"},
-    {id:"HRUN-CAR-01", company:"和潤", name:"和潤汽車4+2專案", cat:"汽車貸", sub:"汽車+機車4+2",
-     premium:false, needHouse:false, needCar:true, needBike:true, needSalary:true,
-     allowBad:true, maxAmount:999999, minAge:20, maxAge:70,
-     note:"汽車＋機車同時進件的套案，可談更高額度。"},
-    {id:"EGOOD-CAR-01", company:"E-Good", name:"優質汽車(信貸)E-Good O", cat:"汽車貸", sub:"汽車信貸",
-     premium:true, needHouse:false, needCar:true, needBike:false, needSalary:true,
-     allowBad:false, maxAmount:300000, minAge:20, maxAge:70,
-     note:"以車作為背後條件的信貸，期數短、周轉快。"},    
+  /* 亞太 – 手機 / 機車 / 工會 */
+  {
+    id: "yt_phone",
+    name: "亞太 手機快速貸分期專案",
+    company: "亞太",
+    type: "手機",
+    level: "優質",
+    preferLevel: "normal",
+    minAge: 20,
+    maxAge: 60,
+    needPayroll: true,
+    needLabor: true,
+    minScore: 560,
+    minIncome: 25000,
+    tags: ["手機貸", "分期", "附商品照 + IMEI"],
+    rate: "依表列，內收手續費",
+    terms: "24 期",
+    note: "名下有智慧型手機＋在職半年以上且有投保，可當小額信貸周轉。",
+  },
+  {
+    id: "yt_bike_union",
+    name: "亞太 一般商品(含機車)分期-職業工會專案",
+    company: "亞太",
+    type: "機車",
+    level: "一般",
+    preferLevel: "normal",
+    minAge: 20,
+    maxAge: 45,
+    needPayroll: false,
+    needLabor: false,
+    needBike: true,
+    isUnion: true,
+    minScore: 540,
+    minIncome: 22000,
+    tags: ["工會", "機車", "一般商品分期"],
+    rate: "依專案表列",
+    terms: "24 期",
+    note: "投保職業工會者適用，文件簡單，適合作為小額周轉。",
+  },
 
-    // 手機 / 商品
-    {id:"21P-01", company:"21資融", name:"21AB A商品/手機貸", cat:"手機貸", sub:"一般商品/手機",
-     premium:true, needHouse:false, needCar:false, needBike:false, needSalary:false,
-     allowBad:true, maxAmount:120000, minAge:20, maxAge:70,
-     note:"條件最寬鬆的小額商品/手機分期。"},
-    {id:"21P-02", company:"21資融", name:"21AB B商品/手機貸", cat:"手機貸", sub:"加強型商品貸",
-     premium:false, needHouse:false, needCar:false, needBike:false, needSalary:true,
-     allowBad:true, maxAmount:120000, minAge:20, maxAge:70,
-     note:"A案不行可改送B案補量。"},
-    {id:"APTA-P-01", company:"亞太", name:"亞太手機小額專案", cat:"手機貸", sub:"一般手機貸",
-     premium:true, needHouse:false, needCar:false, needBike:false, needSalary:true,
-     allowBad:true, maxAmount:80000, minAge:20, maxAge:70,
-     note:"需智慧手機+IMEI與基本文件。"},
-    {id:"DING-P-01", company:"鼎信", name:"鼎信手機貸(買賣件)", cat:"手機貸", sub:"買賣型手機貸",
-     premium:false, needHouse:false, needCar:false, needBike:false, needSalary:false,
-     allowBad:true, maxAmount:60000, minAge:20, maxAge:70,
-     note:"走買賣流程，適合信用較弱需手機或小額的客戶。"},
-    {id:"CHUANG-P-01", company:"創鉅", name:"創鉅手機貸(型號限定)", cat:"手機貸", sub:"型號貸",
-     premium:true, needHouse:false, needCar:false, needBike:false, needSalary:true,
-     allowBad:true, maxAmount:60000, minAge:20, maxAge:70,
-     note:"限定型號，核准率高，手續費內扣2000。"},
-    {id:"MAGI-P-01", company:"瑪吉PAY", name:"瑪吉PAY手機貸", cat:"手機貸", sub:"基數表手機貸",
-     premium:true, needHouse:false, needCar:false, needBike:false, needSalary:true,
-     allowBad:true, maxAmount:100000, minAge:20, maxAge:70,
-     note:"依基數表核貸，額度與費用透明。"},
-    {id:"YUFU-P-01", company:"預付資融", name:"預付資融手機/重機專案", cat:"手機貸", sub:"手機+重機混合",
-     premium:false, needHouse:false, needCar:false, needBike:true, needSalary:true,
-     allowBad:true, maxAmount:200000, minAge:20, maxAge:70,
-     note:"手機或重機一起做的通路專案。"}
-  ];
+  /* 鼎信 – 手機責信 / 銀行信貸仲介 */
+  {
+    id: "dx_phone_credit",
+    name: "鼎信 手機責信貸專案",
+    company: "鼎信",
+    type: "手機",
+    level: "一般",
+    preferLevel: "weak",
+    minAge: 20,
+    maxAge: 60,
+    needPayroll: false,
+    needLabor: false,
+    minScore: 0,
+    minIncome: 0,
+    tags: ["手機責任", "代償", "較寬鬆"],
+    rate: "依個案評估",
+    terms: "依手機分期",
+    note: "適合無法走一般銀行/電信通路的客戶，條件較寬鬆但手續費較高。",
+  },
+  {
+    id: "dx_bank_personal",
+    name: "鼎信 銀行信貸專案（配對多家銀行）",
+    company: "鼎信",
+    type: "信貸",
+    level: "優質",
+    preferLevel: "top",
+    minAge: 20,
+    maxAge: 70,
+    needPayroll: true,
+    needLabor: true,
+    minScore: 620,
+    minIncome: 32000,
+    tags: ["銀行信貸", "多家比價"],
+    rate: "依各銀行",
+    terms: "最長 84 期",
+    note: "符合銀行件條件時，優先配對利率低、額度高的銀行信貸。",
+  },
 
-  function runMatch() {
-    const age = Number(document.getElementById("age").value || 0);
-    const income = Number(document.getElementById("income").value || 0);
-    const amount = Number(document.getElementById("amount").value || 0);
-    const cat = document.getElementById("category").value;
+  /* 創鉅 / 手機 & 機車 */
+  {
+    id: "cj_phone",
+    name: "創鉅 手機貸款專案",
+    company: "創鉅",
+    type: "手機",
+    level: "一般",
+    preferLevel: "normal",
+    minAge: 20,
+    maxAge: 60,
+    needPayroll: false,
+    needLabor: false,
+    minScore: 0,
+    minIncome: 0,
+    tags: ["手機貸", "型號清單", "固定手續費"],
+    rate: "依表列",
+    terms: "48 期",
+    note: "指定手機型號可辦，手續費固定 2000 內扣，適合小額分期周轉。",
+  },
+  {
+    id: "cj_bike",
+    name: "創鉅 機車貸款專案",
+    company: "創鉅",
+    type: "機車",
+    level: "一般",
+    preferLevel: "normal",
+    minAge: 20,
+    maxAge: 60,
+    needBike: true,
+    minScore: 0,
+    minIncome: 0,
+    tags: ["機車貸", "固定設定費+手續費"],
+    rate: "依表列",
+    terms: "48 期",
+    note: "名下有機車即可，設定費+手續費合計約 3000，最高約 10 萬。",
+  },
+];
 
-    const hasHouse = document.getElementById("hasHouse").checked;
-    const hasCar = document.getElementById("hasCar").checked;
-    const hasBike = document.getElementById("hasBike").checked;
-    const hasSalary = document.getElementById("hasSalary").checked;
-    const badCredit = document.getElementById("badCredit").checked;
+/* 可辦理類型與公司選項 */
+const TYPE_OPTIONS = ["房貸", "信貸", "汽車", "機車", "手機", "二胎"];
+const COMPANY_OPTIONS = ["和潤", "亞太", "鼎信", "新鑫", "創鉅"];
 
-    // 讀取勾選的公司
-    const companyCheckboxes = document.querySelectorAll('.company-filter');
-    const selectedCompanies = Array.from(companyCheckboxes)
-      .filter(cb => cb.checked)
-      .map(cb => cb.value);
+/* =========================
+   2. UI 初始化
+   ========================= */
 
-    let filtered = projects.filter(p => {
-      // 大分類
-      if (cat !== "ALL" && p.cat !== (cat === "手機貸" ? "手機貸" : cat)) return false;
+const $ = (sel) => document.querySelector(sel);
 
-      // 公司篩選（若有勾至少一間，只顯示勾到的）
-      if (selectedCompanies.length > 0 && !selectedCompanies.includes(p.company)) {
-        return false;
-      }
-
-      // 年齡
-      if (p.minAge && age && age < p.minAge) return false;
-      if (p.maxAge && age && age > p.maxAge) return false;
-
-      // 金額
-      if (p.maxAmount && amount && amount > p.maxAmount) return false;
-
-      // 條件
-      if (p.needHouse && !hasHouse) return false;
-      if (p.needCar && !hasCar) return false;
-      if (p.needBike && !hasBike) return false;
-      if (p.needSalary && !hasSalary) return false;
-      if (!p.allowBad && badCredit) return false;
-
-      // 簡單收入門檻：借款超過月收 30 倍就排除
-      if (income && amount && amount > income * 30) return false;
-
-      return true;
+function createChips(containerId, items, namePrefix) {
+  const container = $(containerId);
+  container.innerHTML = "";
+  items.forEach((text) => {
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.className = "chip";
+    chip.dataset.value = text;
+    chip.dataset.group = namePrefix;
+    chip.textContent = text;
+    chip.addEventListener("click", () => {
+      chip.classList.toggle("active");
     });
+    container.appendChild(chip);
+  });
+}
 
-    // 排序：優質優先，再依類別、代碼
-    filtered.sort((a, b) => {
-      if (a.premium !== b.premium) return a.premium ? -1 : 1;
-      if (a.cat !== b.cat) return a.cat.localeCompare(b.cat);
-      return a.id.localeCompare(b.id);
-    });
+createChips("#typeChips", TYPE_OPTIONS, "type");
+createChips("#companyChips", COMPANY_OPTIONS, "company");
 
-    const container = document.getElementById("result");
-    if (!filtered.length) {
-      container.innerHTML = '<div class="no-result">目前沒有明顯適合的專案，可以調整公司勾選或條件再試一次。</div>';
-      return;
+/* =========================
+   3. AI 推薦邏輯 (v5+v6)
+   ========================= */
+
+function getClientInput() {
+  const age = parseFloat($("#age").value) || null;
+  const income = parseFloat($("#income").value) || null;
+  const score = parseFloat($("#score").value) || null;
+  const years = parseFloat($("#years").value) || null;
+  const creditStatus = $("#creditStatus").value || "";
+
+  const hasPayroll = $("#hasPayroll").checked;
+  const hasLabor = $("#hasLabor").checked;
+  const hasHouse = $("#hasHouse").checked;
+  const hasCar = $("#hasCar").checked;
+  const hasBike = $("#hasBike").checked;
+  const isUnion = $("#isUnion").checked;
+
+  const selectedTypes = [...document.querySelectorAll('#typeChips .chip.active')].map(
+    (c) => c.dataset.value
+  );
+  const selectedCompanies = [
+    ...document.querySelectorAll("#companyChips .chip.active"),
+  ].map((c) => c.dataset.value);
+
+  return {
+    age,
+    income,
+    score,
+    years,
+    creditStatus,
+    hasPayroll,
+    hasLabor,
+    hasHouse,
+    hasCar,
+    hasBike,
+    isUnion,
+    selectedTypes,
+    selectedCompanies,
+  };
+}
+
+/* 計算單一專案適配分數 */
+function scoreProject(p, c) {
+  let score = 0;
+  const reasons = [];
+
+  /* 年齡 */
+  if (c.age !== null) {
+    if (c.age < (p.minAge || 0) || c.age > (p.maxAge || 99)) {
+      reasons.push("年齡不在專案規定範圍內");
+      return { ok: false, score: -999, reasons };
+    } else {
+      score += 5;
     }
-
-    let html = '<table><thead><tr>' +
-      '<th>代碼</th><th>公司</th><th>專案名稱</th><th>類別</th><th>細分類</th><th>說明 / 判斷重點</th>' +
-      '</tr></thead><tbody>';
-
-    filtered.forEach(p => {
-      html += '<tr>' +
-        `<td>${p.id}</td>` +
-        `<td>${p.company}</td>` +
-        `<td>${p.name} ${p.premium ? '<span class="tag tag-premium">⭐ 優質</span>' : ''}</td>` +
-        `<td><span class="tag tag-cat">${p.cat}</span></td>` +
-        `<td>${p.sub}</td>` +
-        `<td>${p.note}</td>` +
-        '</tr>';
-    });
-
-    html += '</tbody></table>';
-    container.innerHTML = html;
   }
+
+  /* 收入 */
+  if (c.income !== null && p.minIncome) {
+    if (c.income < p.minIncome) {
+      reasons.push(`收入需至少約 ${p.minIncome.toLocaleString()} 元`);
+      return { ok: false, score: -999, reasons };
+    } else {
+      score += 5;
+    }
+  }
+
+  /* 聯徵分數 */
+  if (c.score !== null && p.minScore) {
+    if (c.score < p.minScore) {
+      reasons.push(`建議分數需 ${p.minScore}+`);
+      return { ok: false, score: -999, reasons };
+    } else {
+      score += 5;
+    }
+  }
+
+  /* 在職年資 */
+  if (c.years !== null && c.years >= 1) score += 3;
+  if (c.years !== null && c.years >= 3) score += 2;
+
+  /* 必要資產條件 */
+  if (p.needHouse && !c.hasHouse) {
+    reasons.push("此專案需名下有房");
+    return { ok: false, score: -999, reasons };
+  }
+  if (p.needCar && !c.hasCar) {
+    reasons.push("此專案需名下有汽車");
+    return { ok: false, score: -999, reasons };
+  }
+  if (p.needBike && !c.hasBike) {
+    reasons.push("此專案需名下有機車");
+    return { ok: false, score: -999, reasons };
+  }
+  if (p.needPayroll && !c.hasPayroll) {
+    reasons.push("建議有薪轉較適合此專案");
+  } else if (p.needPayroll && c.hasPayroll) {
+    score += 4;
+  }
+  if (p.needLabor && !c.hasLabor) {
+    reasons.push("建議有勞保 / 健保較佳");
+  } else if (p.needLabor && c.hasLabor) {
+    score += 3;
+  }
+  if (p.isUnion && !c.isUnion) {
+    reasons.push("此專案需工會投保");
+    return { ok: false, score: -999, reasons };
+  }
+
+  /* 信用等級偏好 */
+  if (p.preferLevel === "top" && c.creditStatus === "top") score += 6;
+  if (p.preferLevel === "top" && c.creditStatus === "normal") score += 3;
+  if (p.preferLevel === "normal" && c.creditStatus === "normal") score += 4;
+  if (p.preferLevel === "normal" && c.creditStatus === "weak") score += 2;
+  if (p.preferLevel === "weak" && (c.creditStatus === "weak" || c.creditStatus === "bad"))
+    score += 5;
+
+  /* 類型偏好 */
+  if (c.selectedTypes.length && c.selectedTypes.includes(p.type)) {
+    score += 4;
+  } else if (!c.selectedTypes.length) {
+    score += 1; // 沒選類型則輕微加分
+  }
+
+  /* 公司篩選：只選特定公司時 */
+  if (c.selectedCompanies.length && !c.selectedCompanies.includes(p.company)) {
+    return { ok: false, score: -999, reasons: ["未在勾選的公司範圍內"] };
+  }
+
+  /* 額外小加成：有房/車/機車 + 對應專案 */
+  if (p.type === "房貸" && c.hasHouse) score += 2;
+  if (p.type === "二胎" && c.hasHouse) score += 3;
+  if (p.type === "汽車" && c.hasCar) score += 2;
+  if (p.type === "機車" && c.hasBike) score += 2;
+
+  if (!reasons.length) {
+    reasons.push("條件大致符合，可正常送件評估。");
+  }
+
+  return { ok: true, score, reasons };
+}
+
+function generateRecommendation() {
+  const c = getClientInput();
+  const scored = [];
+
+  for (const p of projects) {
+    const r = scoreProject(p, c);
+    if (!r.ok) continue;
+    scored.push({
+      project: p,
+      score: r.score,
+      reasons: r.reasons,
+    });
+  }
+
+  scored.sort((a, b) => b.score - a.score);
+
+  const best = scored.filter((x) => x.score >= 15);
+  const backup = scored.filter((x) => x.score >= 8 && x.score < 15);
+
+  renderResults(best, backup, scored);
+  updateSummary(c, best, backup, scored);
+}
+
+/* =========================
+   4. 結果顯示 & Tab 切換
+   ========================= */
+
+const tabContent = $("#tabContent");
+const summaryText = $("#summaryText");
+
+function projectCardHTML(item, categoryLabel) {
+  const p = item.project;
+  const levelClass = p.level === "優質" ? "level-top" : "";
+  const tagsHtml = (p.tags || [])
+    .map((t) => `<span class="tag">${t}</span>`)
+    .join("");
+
+  const reasonText = item.reasons ? item.reasons.join("；") : "";
+
+  return `
+    <div class="project-card">
+      <div class="project-header">
+        <div>
+          <div class="project-title">${p.name}</div>
+          <div class="project-meta">
+            <span>📌 公司：${p.company}</span>
+            <span>📂 類別：${p.type}</span>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+          <div class="badge-level ${levelClass}">${p.level}客群</div>
+          ${
+            categoryLabel
+              ? `<div class="tag tag-primary">${categoryLabel}</div>`
+              : ""
+          }
+        </div>
+      </div>
+      <div class="project-meta">
+        <span>💰 利率：${p.rate}</span>
+        <span>📆 期數：${p.terms}</span>
+      </div>
+      <div class="section-title">條件重點</div>
+      <div class="project-meta">
+        ${
+          p.needHouse
+            ? `<span>🏠 需名下有房</span>`
+            : ""
+        }
+        ${
+          p.needCar
+            ? `<span>🚗 需名下有汽車</span>`
+            : ""
+        }
+        ${
+          p.needBike
+            ? `<span>🛵 需名下有機車</span>`
+            : ""
+        }
+        ${
+          p.needPayroll
+            ? `<span>💳 建議有薪轉</span>`
+            : ""
+        }
+        ${
+          p.needLabor
+            ? `<span>🩺 建議有勞/健保</span>`
+            : ""
+        }
+        ${
+          p.isUnion
+            ? `<span>👷 需職業工會</span>`
+            : ""
+        }
+      </div>
+      <div class="section-title">系統說明</div>
+      <div class="reason">${reasonText}</div>
+      ${
+        p.note
+          ? `<div class="section-title">操作者備註</div><div class="project-meta">${p.note}</div>`
+          : ""
+      }
+      <div style="margin-top:4px;">${tagsHtml}</div>
+    </div>
+  `;
+}
+
+function renderResults(best, backup, allScored) {
+  const allListHtml = allScored
+    .map((item) => projectCardHTML(item, "全部專案"))
+    .join("");
+
+  const bestHtml =
+    best.length > 0
+      ? best.map((item) => projectCardHTML(item, "⭐ 優先推薦")).join("")
+      : `<div class="empty">目前沒有分數特別高的專案，可以改放寬條件或改選「全部專案列表」查看。</div>`;
+
+  const backupHtml =
+    backup.length > 0
+      ? backup
+          .map((item) => projectCardHTML(item, "✅ 可備選"))
+          .join("")
+      : `<div class="empty">目前沒有備選專案，建議調整類型或公司篩選條件。</div>`;
+
+  tabContent.dataset.best = bestHtml;
+  tabContent.dataset.backup = backupHtml;
+  tabContent.dataset.all = allListHtml || `<div class="empty">目前尚無符合條件的專案，請放寬條件或增加專案資料。</div>`;
+
+  // 預設顯示最佳推薦
+  tabContent.innerHTML = tabContent.dataset.best;
+}
+
+function updateSummary(c, best, backup, allScored) {
+  const total = allScored.length;
+  const bestCount = best.length;
+  const backupCount = backup.length;
+
+  let summary = `已依照目前輸入條件，為你從 ${projects.length} 個專案中篩出 ${total} 個可送件評估的方案。`;
+  if (bestCount) {
+    summary += ` 其中 ${bestCount} 個為「優先推薦」，${backupCount} 個為「備選」。`;
+  } else if (backupCount) {
+    summary += ` 目前沒有分數非常高的專案，但有 ${backupCount} 個「備選」可參考。`;
+  } else {
+    summary = "目前條件較嚴格，尚未找到明顯合適專案，可放寬公司或專案類型後重試。";
+  }
+
+  summaryText.textContent = summary;
+}
+
+/* Tab 切換 */
+document.querySelectorAll("#resultTabs .tab").forEach((tab) => {
+  tab.addEventListener("click", () => {
+    document
+      .querySelectorAll("#resultTabs .tab")
+      .forEach((t) => t.classList.remove("active"));
+    tab.classList.add("active");
+    const target = tab.dataset.tab;
+    tabContent.innerHTML = tabContent.dataset[target] || "";
+  });
+});
+
+/* =========================
+   5. 計算機功能 (v7)
+   ========================= */
+
+function calcEqualPayment() {
+  const amount = parseFloat($("#calcAmount").value);
+  const months = parseInt($("#calcMonths").value, 10);
+  const rate = parseFloat($("#calcRate").value);
+
+  if (!amount || !months || !rate) {
+    $("#calcPayResult").textContent = "請先輸入金額、期數與年利率。";
+    return;
+  }
+
+  const monthlyRate = rate / 100 / 12;
+  const payment =
+    (amount * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -months));
+  const total = payment * months;
+
+  $("#calcPayResult").textContent = `每月約需繳：${Math.round(
+    payment
+  ).toLocaleString()} 元，總還款約：${Math.round(total).toLocaleString()} 元。`;
+}
+
+function calcSecondLoan() {
+  const houseValue = parseFloat($("#houseValue").value);
+  const firstLoan = parseFloat($("#firstLoan").value);
+  const maxLtv = parseFloat($("#maxLtv").value);
+
+  if (!houseValue || maxLtv == null) {
+    $("#calcSecondResult").textContent = "請先輸入房屋估價與最高成數。";
+    return;
+  }
+
+  const maxTotal = (houseValue * maxLtv) / 100;
+  const remain = maxTotal - (firstLoan || 0);
+
+  if (remain <= 0) {
+    $("#calcSecondResult").textContent =
+      "以目前設定一胎餘額與成數，理論上空間不足以做二胎。";
+  } else {
+    $("#calcSecondResult").textContent = `概算可操作二胎額度約：${Math.round(
+      remain
+    ).toLocaleString()} 元（實際以估價與公司審核為準）。`;
+  }
+}
+
+/* =========================
+   6. 事件綁定 & 重置
+   ========================= */
+
+$("#btnRecommend").addEventListener("click", generateRecommendation);
+$("#btnCalcPay").addEventListener("click", calcEqualPayment);
+$("#btnCalcSecond").addEventListener("click", calcSecondLoan);
+
+$("#btnReset").addEventListener("click", () => {
+  ["age","income","score","years"].forEach(id => { $( "#" + id ).value = ""; });
+  ["hasPayroll","hasLabor","hasHouse","hasCar","hasBike","isUnion"].forEach(
+    (id) => { $("#" + id).checked = false; }
+  );
+  $("#creditStatus").value = "";
+  document.querySelectorAll(".chip.active").forEach((c) => c.classList.remove("active"));
+  summaryText.textContent = "條件已清空，請重新輸入後再按「產生 AI 推薦」。";
+  tabContent.innerHTML =
+    '<div class="empty">尚未產生結果，請先於左側輸入客戶條件並產生推薦。</div>';
+});
+
+/* 初始畫面預設文案 */
+tabContent.innerHTML =
+  '<div class="empty">尚未產生結果，請先於左側輸入客戶條件並按「產生 AI 推薦」。</div>';
 </script>
 </body>
 </html>
